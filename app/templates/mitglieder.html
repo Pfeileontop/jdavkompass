@@ -4,11 +4,11 @@
 
 {% block content %}
 <section class="page-section">
-    <div class="mitglieder-container">
+    <div class="table-container">
         <h2>Mitglieder Genehmigen</h2>
 
         {% if mitglieder_unapproved_daten %}
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -56,11 +56,11 @@
         {% endif %}
     </div>
 
-    <div class="mitglieder-container">
+    <div class="table-container">
         <h2>Alle Mitglieder</h2>
 
         {% if mitglieder_daten %}
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>

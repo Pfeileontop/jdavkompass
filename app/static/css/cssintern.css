@@ -250,23 +250,28 @@ button {
     margin-bottom: 5rem;
 }
 
-.styled-table {
+.table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.styled-table th {
+.table th {
     text-align: left;
     font-weight: 600;
     font-size: 14px;
-    padding: 6px 10px;
-    border-bottom: 2px solid #e5e7eb;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--color-border);
 }
 
-.styled-table td {
+.table td {
     padding: 10px 12px;
     border-bottom: 1px solid #f1f1f1;
     font-size: 14px;
+}
+
+.table--center th,
+.table--center td {
+    text-align: center;
 }
 
 .center {
@@ -324,30 +329,6 @@ input[type="checkbox"] {
     padding: 2px 6px;
     color: var(--color-highlight);
     cursor: pointer;
-}
-
-.mitglieder-container {
-    margin-top: 3rem;
-}
-
-.mitglieder-container button {
-    margin: 0;
-    padding: 6px 10px;
-    border-radius: 5px;
-}
-
-.mitglieder-container th {
-    text-align: left;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 6px 10px;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.mitglieder-container td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f1f1f1;
-    font-size: 14px;
 }
 
 .inline-form {
