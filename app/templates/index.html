@@ -5,39 +5,48 @@
 {% block content %}
 <section class="dashboard">
     <h1>Willkommen, {{ user[1] }}</h1>
-    <h3>Heute ist {{ today }}{% if heutige_gruppen %}, es finden folgende Jugendgruppen statt{% endif %}</h3>
+    <h3>
+        Heute ist {{ today }}
+        {% if heutige_gruppen %}, es finden folgende Jugendgruppen statt{% endif %}
+    </h3>
+
     <div class="cards">
         {% if heutige_gruppen %}
             {% for gruppe in heutige_gruppen %}
-                <a class="card" href="{{ url_for('gruppen.gruppe_detail', gruppe_id=gruppe.id) }}">
-                    <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
-                    <div class="gruppe-info">
-                        <div class="info-item">
-                            <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
-                        </div>
-                        {% if gruppe.gruppenleiter %}
-                            <div class="info-item"><strong>Gruppenleiter:</strong> {{ gruppe.gruppenleiter | join(', ') }}</div>
-                        {% endif %}
-                        {% if gruppe.mitglieder %}
-                            <div class="info-item"><strong>Teilnehmende:</strong> {{ gruppe.mitglieder | join(', ') }}</div>
-                        {% endif %}
+            <a class="card" href="{{ url_for('gruppen.gruppe_detail', gruppe_id=gruppe.id) }}">
+                <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
+                <div class="gruppe-info">
+                    <div class="info-item">
+                        <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
                     </div>
-                </a>
+                    {% if gruppe.gruppenleiter %}
+                    <div class="info-item">
+                        <strong>Gruppenleiter:</strong> {{ gruppe.gruppenleiter | join(', ') }}
+                    </div>
+                    {% endif %}
+                    {% if gruppe.mitglieder %}
+                    <div class="info-item">
+                        <strong>Teilnehmende:</strong> {{ gruppe.mitglieder | join(', ') }}
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
             {% endfor %}
         {% else %}
             <p>Heute ist keine Gruppe</p>
         {% endif %}
     </div>
+
     <h3>Hier findest du alle wichtigen Dokumente zum download</h3>
 
     <div class="cards">
-
-    <div class="card">
-        <h2>Fahrtkostenabrechnung</h2>
-        <a href="/download/DAV%20Reisekostenformular.pdf" download>
-            Klicke hier zum Download
-        </a>
+        <div class="card">
+            <h2>Fahrtkostenabrechnung</h2>
+            <a href="/download/DAV%20Reisekostenformular.pdf" download>
+                Klicke hier zum Download
+            </a>
         </div>
+
         <div class="card">
             <h2>Auslagenerstattung</h2>
             <a href="/download/DAV%20Reisekostenformular.pdf" download>

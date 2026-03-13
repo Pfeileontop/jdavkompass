@@ -5,104 +5,102 @@
     <h1>{{ gruppe[1] }}</h1>
     <p>Gruppenalter {{ avg_age }} Jahre</p>
     <p>{{ gruppe['wochentag'] }} {{ gruppe.startzeit }} - {{ gruppe.endzeit }}</p>
+
     <div class="table-container">
         <h3>Anwesenheitsliste</h3>
         <form method="post" id="attendance-form">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    {% for datum in alle_daten %}
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        {% for datum in alle_daten %}
                         <th class="historie">{{ datum[8:10] }}.{{ datum[5:7] }}.{{ datum[0:4] }}</th>
-                    {% endfor %}
-                    {% if today_name == gruppe['wochentag'] %}
+                        {% endfor %}
+                        {% if today_name == gruppe['wochentag'] %}
                         <th>Heute?</th>
-                    {% endif %}
-                    <th>Notfallkontakt</th>
-                    {% if check_user(3) %}
+                        {% endif %}
+                        <th>Notfallkontakt</th>
+                        {% if check_user(3) %}
                         <th>Aktion</th>
-                    {% endif %}
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for mitglied in mitglieder %}
-                <tr>
-                    <td>{{ mitglied[1] }} {{ mitglied[2] }}</td>
-
-                    {% for datum in alle_daten %}
-                    <td class="center historie">
-                        {% if anwesenheitshistorie.get(mitglied[0], {}).get(datum) %}
-                            ✅
-                        {% else %}
-                            -
                         {% endif %}
-                    </td>
-                    {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mitglied in mitglieder %}
+                    <tr>
+                        <td>{{ mitglied[1] }} {{ mitglied[2] }}</td>
+                        {% for datum in alle_daten %}
+                        <td class="center historie">
+                            {% if anwesenheitshistorie.get(mitglied[0], {}).get(datum) %}
+                            ✅
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        {% endfor %}
 
-                    {% if today_name == gruppe['wochentag'] and check_user(2) %}
-                    <td class="center">
-                        <input type="checkbox"
-                                name="mitglied_{{ mitglied[0] }}"
-                                {% if anwesenheitheute.get(mitglied[0]) %}checked{% endif %}>
-                    </td>
-                    {% endif %}
+                        {% if today_name == gruppe['wochentag'] and check_user(2) %}
+                        <td class="center">
+                            <input type="checkbox"
+                                   name="mitglied_{{ mitglied[0] }}"
+                                   {% if anwesenheitheute.get(mitglied[0]) %}checked{% endif %}>
+                        </td>
+                        {% endif %}
 
-                    <td class="center">
-                        {% if mitglied[4] %}
+                        <td class="center">
+                            {% if mitglied[4] %}
                             {{ mitglied[4] }}
-                        {% else %}
+                            {% else %}
                             kein Notfallkontakt!
+                            {% endif %}
+                        </td>
+
+                        {% if check_user(3) %}
+                        <td class="center">
+                            <button class="btn-remove" type="submit"
+                                    form="remove-member-{{ mitglied[0] }}">
+                                aus Gruppe entfernen
+                            </button>
+                        </td>
                         {% endif %}
-                    </td>
-
-                    {% if check_user(3) %}
-                    <td class="center">
-                        <button class="btn-remove" type="submit"
-                                form="remove-member-{{ mitglied[0] }}">
-                            aus Gruppe entfernen
-                        </button>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-
-                {% for gruppenleiter in gruppenleiter %}
-                <tr class="gruppenleiter">
-                    <td>{{ gruppenleiter[1] }} {{ gruppenleiter[2] }}</td>
-
-                    {% for datum in alle_daten %}
-                    <td class="center historie">
-                        {% if gruppenleiter_anwesenheithistorie.get(gruppenleiter[0], {}).get(datum) %}
-                            ✅
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
+                    </tr>
                     {% endfor %}
 
-                    {% if today_name == gruppe['wochentag'] %}
-                    <td class="center">
-                        <input type="checkbox"
-                                name="gruppenleiter_{{ gruppenleiter[0] }}"
-                                {% if gruppenleiter_anwesenheitheute.get(gruppenleiter[0]) %}checked{% endif %}>
-                    </td>
-                    {% endif %}
+                    {% for gruppenleiter in gruppenleiter %}
+                    <tr class="gruppenleiter">
+                        <td>{{ gruppenleiter[1] }} {{ gruppenleiter[2] }}</td>
+                        {% for datum in alle_daten %}
+                        <td class="center historie">
+                            {% if gruppenleiter_anwesenheithistorie.get(gruppenleiter[0], {}).get(datum) %}
+                            ✅
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        {% endfor %}
 
-                    <td></td>
+                        {% if today_name == gruppe['wochentag'] %}
+                        <td class="center">
+                            <input type="checkbox"
+                                   name="gruppenleiter_{{ gruppenleiter[0] }}"
+                                   {% if gruppenleiter_anwesenheitheute.get(gruppenleiter[0]) %}checked{% endif %}>
+                        </td>
+                        {% endif %}
 
-                    {% if check_user(3) %}
-                    <td class="center">
-                        <button class="btn-remove" type="submit"
-                                form="remove-leader-{{ gruppenleiter[0] }}">
-                            aus Gruppe entfernen
-                        </button>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <td></td>
+
+                        {% if check_user(3) %}
+                        <td class="center">
+                            <button class="btn-remove" type="submit"
+                                    form="remove-leader-{{ gruppenleiter[0] }}">
+                                aus Gruppe entfernen
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </form>
 
         {% if check_user(3) %}
@@ -112,20 +110,15 @@
         </form>
         {% endif %}
 
-        <!-- Buttons Wrapper -->
         <div class="btn-wrapper-anwesenheit">
             {% if today_name == gruppe['wochentag'] %}
-            <button type="submit"
-                    class="btn-submit"
-                    form="attendance-form">
+            <button type="submit" class="btn-submit" form="attendance-form">
                 Speichern
             </button>
             {% endif %}
 
             {% if check_user(3) %}
-            <button type="submit"
-                    class="btn-submit"
-                    form="download-form">
+            <button type="submit" class="btn-submit" form="download-form">
                 Download Anwesenheitsliste
             </button>
             {% endif %}
@@ -133,45 +126,46 @@
 
         {% for mitglied in mitglieder %}
         <form id="remove-member-{{ mitglied[0] }}"
-            action="{{ url_for('gruppen.mitglied_entfernen',
-                            gruppe_id=gruppe[0],
-                            mitglied_id=mitglied[0]) }}"
-            method="POST">
+              action="{{ url_for('gruppen.mitglied_entfernen', gruppe_id=gruppe[0], mitglied_id=mitglied[0]) }}"
+              method="POST">
         </form>
         {% endfor %}
 
         {% for gruppenleiter in gruppenleiter %}
         <form id="remove-leader-{{ gruppenleiter[0] }}"
-            action="{{ url_for('gruppen.gruppenleiter_entfernen',
-                            gruppe_id=gruppe[0],
-                            gruppenleiter_id=gruppenleiter[0]) }}"
-            method="POST">
+              action="{{ url_for('gruppen.gruppenleiter_entfernen', gruppe_id=gruppe[0], gruppenleiter_id=gruppenleiter[0]) }}"
+              method="POST">
         </form>
         {% endfor %}
     </div>
 
     {% if check_user(2) %}
-        <h2>weitere Optionen</h2>
+    <h2>weitere Optionen</h2>
     {% endif %}
+
     <div class="gruppe-actions">
         {% if check_user(3) %}
         <div class="action-item">
             <h3>Mitglied hinzufügen</h3>
-            <input type="text" id="search_mitglied" placeholder="Mitglied suchen..." value="{{ search_query_mitglieder }}" oninput="searchMitglied()">
+            <input type="text" id="search_mitglied" placeholder="Mitglied suchen..."
+                   value="{{ search_query_mitglieder }}" oninput="searchMitglied()">
             <div id="mitglieder_results"></div>
         </div>
         {% endif %}
-    
+
         {% if check_user(2) %}
         <div class="action-item">
             <h3>Gruppenleiter hinzufügen</h3>
-            <input type="text" id="search_gruppenleiter" placeholder="Gruppenleiter suchen..." value="{{ search_query_gruppenleiter }}" oninput="searchGruppenleiter()">
+            <input type="text" id="search_gruppenleiter" placeholder="Gruppenleiter suchen..."
+                   value="{{ search_query_gruppenleiter }}" oninput="searchGruppenleiter()">
             <div id="gruppenleiter_results"></div>
         </div>
         {% endif %}
-    
+
         {% if check_user(3) %}
-        <form action="{{ url_for('gruppen.gruppe_loeschen', gruppe_id=gruppe[0]) }}" method="POST" onsubmit="return confirm('Gruppe wirklich löschen?');">
+        <form action="{{ url_for('gruppen.gruppe_loeschen', gruppe_id=gruppe[0]) }}"
+              method="POST"
+              onsubmit="return confirm('Gruppe wirklich löschen?');">
             <button type="submit" class="btn-delete">Gruppe löschen</button>
         </form>
         {% endif %}
@@ -179,104 +173,74 @@
 </section>
 
 <script>
-    const gruppeId = {{ gruppe[0] }};
+const gruppeId = {{ gruppe[0] }};
 
-    function searchMitglied() {
-        var query = document.getElementById("search_mitglied").value;
-        var url = '/search_mitglied?query=' + encodeURIComponent(query);
-        
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            var resultsDiv = document.getElementById("mitglieder_results");
-            resultsDiv.innerHTML = ''; // Clear previous results
-            data.results.forEach(result => {
-                var div = document.createElement("div");
-                div.className = "result-item";  // Flexbox for spacing
-                
-                var span = document.createElement("span");
-                span.textContent = result.vorname + " " + result.nachname;
-                
-                var button = document.createElement("button");
-                button.type = "button";
-                button.textContent = "hinzufügen";
-                button.onclick = function() {
-                    addMitglied(result.id);
-                };
+function searchMitglied() {
+    var query = document.getElementById("search_mitglied").value;
+    var url = '/search_mitglied?query=' + encodeURIComponent(query);
 
-                div.appendChild(span);
-                div.appendChild(button);
-                resultsDiv.appendChild(div);
-            });
-        })
-        .catch(error => console.error('Error:', error));  // Fehlerbehandlung
-    }
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(response => response.json())
+    .then(data => {
+        var resultsDiv = document.getElementById("mitglieder_results");
+        resultsDiv.innerHTML = '';
+        data.results.forEach(result => {
+            var div = document.createElement("div");
+            div.className = "result-item";
 
-    function searchGruppenleiter() {
-        var query = document.getElementById("search_gruppenleiter").value;
-        var url = '/search_gruppenleiter?query=' + encodeURIComponent(query);
+            var span = document.createElement("span");
+            span.textContent = result.vorname + " " + result.nachname;
 
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            var resultsDiv = document.getElementById("gruppenleiter_results");
-            resultsDiv.innerHTML = ''; // Clear previous results
-            data.results.forEach(result => {
-                var div = document.createElement("div");
-                div.className = "result-item";  // Flexbox for spacing
-                
-                var span = document.createElement("span");
-                span.textContent = result.vorname + " " + result.nachname;
+            var button = document.createElement("button");
+            button.type = "button";
+            button.textContent = "hinzufügen";
+            button.onclick = function() { addMitglied(result.id); };
 
-                var button = document.createElement("button");
-                button.type = "button";
-                button.textContent = "hinzufügen";
-                button.onclick = function() {
-                    addGruppenleiter(result.id);
-                };
+            div.appendChild(span);
+            div.appendChild(button);
+            resultsDiv.appendChild(div);
+        });
+    })
+    .catch(error => console.error('Error:', error));
+}
 
-                div.appendChild(span);
-                div.appendChild(button);
-                resultsDiv.appendChild(div);
-            });
-        })
-        .catch(error => console.error('Error:', error));  // Fehlerbehandlung
-    }
+function searchGruppenleiter() {
+    var query = document.getElementById("search_gruppenleiter").value;
+    var url = '/search_gruppenleiter?query=' + encodeURIComponent(query);
 
-    function addMitglied(id) {
-        fetch(`/gruppen/${gruppeId}/mitglied/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        }).then(() => {
-        window.location.reload();
-    });
-    }
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(response => response.json())
+    .then(data => {
+        var resultsDiv = document.getElementById("gruppenleiter_results");
+        resultsDiv.innerHTML = '';
+        data.results.forEach(result => {
+            var div = document.createElement("div");
+            div.className = "result-item";
 
-    function addGruppenleiter(id) {
-        fetch(`/gruppenleiter_zu_gruppe/${gruppeId}/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        }).then(() => {
-        window.location.reload();
-    });
-    }
+            var span = document.createElement("span");
+            span.textContent = result.vorname + " " + result.nachname;
+
+            var button = document.createElement("button");
+            button.type = "button";
+            button.textContent = "hinzufügen";
+            button.onclick = function() { addGruppenleiter(result.id); };
+
+            div.appendChild(span);
+            div.appendChild(button);
+            resultsDiv.appendChild(div);
+        });
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function addMitglied(id) {
+    fetch(`/gruppen/${gruppeId}/mitglied/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    .then(() => { window.location.reload(); });
+}
+
+function addGruppenleiter(id) {
+    fetch(`/gruppenleiter_zu_gruppe/${gruppeId}/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    .then(() => { window.location.reload(); });
+}
 </script>
-
-
-
-
 {% endblock %}

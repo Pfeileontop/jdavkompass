@@ -12,12 +12,15 @@
 
     <div class="profile-form">
         <h2>Passwort ändern</h2>
+
         {% if success %}
-            <p class="success">{{ success }}</p>
+        <p class="success">{{ success }}</p>
         {% endif %}
+
         {% if error %}
-            <p class="error">{{ error }}</p>
+        <p class="error">{{ error }}</p>
         {% endif %}
+
         <form method="POST" action="{{ url_for('profile.profile') }}">
             <label for="old_password">Altes Passwort:</label>
             <input type="password" name="old_password" id="old_password" required>

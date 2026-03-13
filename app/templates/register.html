@@ -1,16 +1,21 @@
 {% extends "base_extern.html" %}
+
 {% block title %}Registrierung | JDAV Hildesheim{% endblock %}
+
 {% block content %}
-    <div class="auth-container">
-        <h2>Registrieren</h2>
-        <form method="POST" action="/register">
-            <input type="text" name="username" placeholder="Benutzername" required>
-            <input type="password" name="password" placeholder="Passwort" required>
-            <button type="submit">Registrieren</button>
-        </form>
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <p>Bereits registriert? <a href="/login">Login</a></p>
-    </div>
+<div class="auth-container">
+    <h2>Registrieren</h2>
+
+    <form method="POST" action="/register">
+        <input type="text" name="username" placeholder="Benutzername" required>
+        <input type="password" name="password" placeholder="Passwort" required>
+        <button type="submit">Registrieren</button>
+    </form>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <p>Bereits registriert? <a href="/login">Login</a></p>
+</div>
 {% endblock %}

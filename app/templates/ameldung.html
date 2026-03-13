@@ -1,8 +1,15 @@
 {% extends "base_extern.html" %}
+
 {% block title %}Anmeldung | JDAV Hildesheim{% endblock %}
+
 {% block content %}
 <h1>Teilnehmeranmeldung</h1>
-<p>Bitte gebe hier alle Daten für das anzumeldene Mitglied ein. Sollten sich in Zukunft Daten ändern, bitte teile dies den Gruppenleitenden mit. Für eine Teilname an einer Jugendgruppe ist eine Mitgliedschaft im DAV erforderlich.</p>
+<p>
+    Bitte gebe hier alle Daten für das anzumeldene Mitglied ein. Sollten sich in Zukunft Daten ändern,
+    bitte teile dies den Gruppenleitenden mit. Für eine Teilname an einer Jugendgruppe ist eine
+    Mitgliedschaft im DAV erforderlich.
+</p>
+
 <form action="{{ url_for('mitgliederregistrierung.tnanmelden') }}" method="POST">
     <fieldset>
         <legend>Teilnehmer</legend>
@@ -36,15 +43,25 @@
 
     <fieldset>
         <legend>Unterschrift *Pflichtfeld</legend>
-        <label>Bitte im unteren Feld entweder per Finger, sonder per Maus eine Unterschrift angeben.</label><br>
-        <label>Mit einer Unterschrift und mit dem Anmelden des Teilnehmers bestätige ich die Richtigkeit meiner Angaben. Ich bin damit einverstanden, dass während Gruppenaktivitäen Bild und Videomaterial von Gruppenleitenden aufgenommen und für die Medien der JDAV Hildesheim verwendet werden dürfen. Für die Person die ich anmelde existiert eine Mitgliedschaft im DAV. Ich bin damit einverstanden, dass meine Daten digital intern verarbeitet werden und zum Zwecke der Gruppenorganisation gespeichert werden. Ich bin mit den Kosten der Teilname einverstanden. Ich bin für Person, die ich anmelde erziehugsberechtigt.</label>
+        <label>
+            Bitte im unteren Feld entweder per Finger, sonder per Maus eine Unterschrift angeben.
+        </label><br>
+        <label>
+            Mit einer Unterschrift und mit dem Anmelden des Teilnehmers bestätige ich die Richtigkeit meiner Angaben.
+            Ich bin damit einverstanden, dass während Gruppenaktivitäen Bild und Videomaterial von Gruppenleitenden
+            aufgenommen und für die Medien der JDAV Hildesheim verwendet werden dürfen. Für die Person die ich anmelde
+            existiert eine Mitgliedschaft im DAV. Ich bin damit einverstanden, dass meine Daten digital intern verarbeitet
+            werden und zum Zwecke der Gruppenorganisation gespeichert werden. Ich bin mit den Kosten der Teilname einverstanden.
+            Ich bin für Person, die ich anmelde erziehugsberechtigt.
+        </label>
         <canvas id="signature-pad" style="border: 1px solid #ccc;"></canvas><br>
         <button type="button" onclick="clearSignature()">Unterschrift löschen</button>
         <input type="hidden" name="unterschrift" id="unterschrift">
     </fieldset>
 
-        <button type="submit" class="btn-submit">Teilnehmer anmelden</button>
+    <button type="submit" class="btn-submit">Teilnehmer anmelden</button>
 </form>
+
 <script>
     const canvas = document.getElementById('signature-pad');
     const ctx = canvas.getContext('2d');
@@ -66,10 +83,7 @@
 
     function getPosition(event) {
         const rect = canvas.getBoundingClientRect();
-        return {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
+        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
     }
 
     canvas.addEventListener('mousedown', (e) => {

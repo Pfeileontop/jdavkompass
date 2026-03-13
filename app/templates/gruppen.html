@@ -6,23 +6,30 @@
 <section class="gruppe">
     <div class="cards">
         {% for gruppe in gruppen %}
-            <a class="card" href="{{ url_for('gruppen.gruppe', gruppe_id=gruppe.id) }}">
-                <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
-                <div class="gruppe-info">
-                    <div class="info-item">
-    <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
-</div>
-                    {% if gruppe.gruppenleiter %}
-                        <div class="info-item"><strong>Gruppenleiter:</strong> {{ gruppe.gruppenleiter | join(', ') }}</div>
-                    {% endif %}
-                    {% if gruppe.mitglieder %}
-                        <div class="info-item"><strong>Teilnehmende:</strong> {{ gruppe.mitglieder | join(', ') }}</div>
-                    {% endif %}
+        <a class="card" href="{{ url_for('gruppen.gruppe', gruppe_id=gruppe.id) }}">
+            <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
+            <div class="gruppe-info">
+                <div class="info-item">
+                    <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
                 </div>
-            </a>
+                {% if gruppe.gruppenleiter %}
+                <div class="info-item">
+                    <strong>Gruppenleiter:</strong> {{ gruppe.gruppenleiter | join(', ') }}
+                </div>
+                {% endif %}
+                {% if gruppe.mitglieder %}
+                <div class="info-item">
+                    <strong>Teilnehmende:</strong> {{ gruppe.mitglieder | join(', ') }}
+                </div>
+                {% endif %}
+            </div>
+        </a>
         {% endfor %}
 
-        <form id="neue-gruppe-form" class="card neue-gruppe-card" action="{{ url_for('gruppen.neue_gruppe') }}" method="POST" style="display:none;">
+        <form id="neue-gruppe-form" class="card neue-gruppe-card"
+              action="{{ url_for('gruppen.neue_gruppe') }}"
+              method="POST"
+              style="display:none;">
             <label>Name: <input type="text" name="name" required></label>
             <label>Beschreibung: <textarea name="beschreibung"></textarea></label>
             <label>Wochentag:
@@ -39,7 +46,6 @@
             <label>Startzeit:
                 <input type="time" name="startzeit" required>
             </label>
-
             <label>Endzeit:
                 <input type="time" name="endzeit" required>
             </label>
@@ -47,23 +53,15 @@
         </form>
     </div>
 
-{% if check_user(3) %}
-<button id="neue-gruppe-btn" class="btn-submit">Neue Gruppe erstellen</button>
-{% endif %}
+    {% if check_user(3) %}
+    <button id="neue-gruppe-btn" class="btn-submit">Neue Gruppe erstellen</button>
+    {% endif %}
 </section>
-
-
-
 
 <script>
 document.getElementById('neue-gruppe-btn').addEventListener('click', function() {
     const form = document.getElementById('neue-gruppe-form');
-    if (form.style.display === 'none') {
-        form.style.display = 'block';
-    } else {
-        form.style.display = 'none';
-    }
+    form.style.display = (form.style.display === 'none') ? 'block' : 'none';
 });
 </script>
-
 {% endblock %}

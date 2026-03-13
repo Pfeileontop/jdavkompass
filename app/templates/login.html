@@ -1,16 +1,20 @@
 {% extends "base_extern.html" %}
+
 {% block title %}Login | JDAV Hildesheim{% endblock %}
+
 {% block content %}
-    <div class="auth-container">
-        <h2>Login</h2>
-        <form method="POST" action="/login">
-            <input type="text" name="username" placeholder="Benutzername" required>
-            <input type="password" name="password" placeholder="Passwort" required>
-            <button type="submit">Login</button>
-        </form>
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <p>Noch keinen Account? <a href="/register">Registrieren</a></p>
-    </div>
+<div class="auth-container">
+    <h2>Login</h2>
+    <form method="POST" action="/login">
+        <input type="text" name="username" placeholder="Benutzername" required>
+        <input type="password" name="password" placeholder="Passwort" required>
+        <button type="submit">Login</button>
+    </form>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <p>Noch keinen Account? <a href="/register">Registrieren</a></p>
+</div>
 {% endblock %}

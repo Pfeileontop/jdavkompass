@@ -5,8 +5,8 @@
 {% block content %}
 <section class="admin">
     <h1>Admin Dashboard</h1>
-    <h3>Accounts</h3>
 
+    <h3>Accounts</h3>
     <div class="table-container">
         <table class="styled-table">
             <thead>
@@ -25,46 +25,40 @@
                     <td>{{ acc.status }}</td>
                     <td>
                         {% if acc.rolls != "4" %}
-                            <form method="POST" class="inline-form">
-                                <input type="hidden" name="account_id" value="{{ acc.id }}">
+                        <form method="POST" class="inline-form">
+                            <input type="hidden" name="account_id" value="{{ acc.id }}">
 
-                                {% if acc.status == "requesting access" %}
-                                    <button type="submit" name="action" value="approve" class="btn-submit">
-                                        Approve
-                                    </button>
-                                {% else %}
-                                    <select name="new_role" class="minimal-select">
-                                    {% for role in ["1", "2", "3", "4"] %}
-                                        <option value="{{ role }}"
-                                        {% if acc.rolls == role %}selected{% endif %}>
-            
-                                        {% if role == "1" %}View-only
-                                        {% elif role == "2" %}Julei
-                                        {% elif role == "3" %}Gruppenplaner
-                                        {% elif role == "4" %}Admin
-                                        {% endif %}
+                            {% if acc.status == "requesting access" %}
+                            <button type="submit" name="action" value="approve" class="btn-submit">
+                                Approve
+                            </button>
+                            {% else %}
+                            <select name="new_role" class="minimal-select">
+                                {% for role in ["1", "2", "3", "4"] %}
+                                <option value="{{ role }}" {% if acc.rolls == role %}selected{% endif %}>
+                                    {% if role == "1" %}View-only
+                                    {% elif role == "2" %}Julei
+                                    {% elif role == "3" %}Gruppenplaner
+                                    {% elif role == "4" %}Admin
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
 
-                                        </option>
-                                    {% endfor %}
-                                    </select>
+                            <button type="submit" name="action" value="change_role" class="btn-submit">
+                                Change
+                            </button>
+                            {% endif %}
 
-                                    <button type="submit" name="action" value="change_role" class="btn-submit">
-                                        Change
-                                    </button>
-                                {% endif %}
-
-                                <button type="submit"
-                                        name="action"
-                                        value="delete"
-                                        class="btn-delete"
-                                        onclick="return confirm('Delete this account permanently?');">
-                                    Delete
-                                </button>
-                            </form>
+                            <button type="submit" name="action" value="delete" class="btn-delete"
+                                    onclick="return confirm('Delete this account permanently?');">
+                                Delete
+                            </button>
+                        </form>
                         {% else %}
-                            <span class="text-muted">
-                                Admin accounts cannot be modified
-                            </span>
+                        <span class="text-muted">
+                            Admin accounts cannot be modified
+                        </span>
                         {% endif %}
                     </td>
                 </tr>
@@ -74,7 +68,6 @@
     </div>
 
     <h3>Gruppenleiter</h3>
-
     <div class="table-container">
         <table class="styled-table">
             <thead>
@@ -95,25 +88,25 @@
             <tbody>
                 {% for leiter in gruppenleiter %}
                 <tr>
-                    <td>{{leiter.vorname}}</td>
-                    <td>{{leiter.nachname}}</td>
-                    <td>{{leiter.geburtsdatum}}</td>
-                    <td>{{leiter.iban}}</td>
-                    <td>{{leiter.bic}}</td>
-                    <td>{{leiter.bank}}</td>
-                    <td>{{leiter.telefon}}</td>
-                    <td>{{leiter.gruppenrolle}}</td>
-                    <td>{{leiter.vereinsrolle}}</td>
+                    <td>{{ leiter.vorname }}</td>
+                    <td>{{ leiter.nachname }}</td>
+                    <td>{{ leiter.geburtsdatum }}</td>
+                    <td>{{ leiter.iban }}</td>
+                    <td>{{ leiter.bic }}</td>
+                    <td>{{ leiter.bank }}</td>
+                    <td>{{ leiter.telefon }}</td>
+                    <td>{{ leiter.gruppenrolle }}</td>
+                    <td>{{ leiter.vereinsrolle }}</td>
                     {% if leiter.jugendgruppen %}
                     <td>{{ leiter.jugendgruppen.replace(',', '<br>') | safe }}</td>
                     {% else %}
                     <td>Noch keine gruppen</td>
                     {% endif %}
                     <td>
-                    <a href="{{ url_for('admin.gruppenleiter_bearbeiten', id=leiter.id) }}" class="btn btn-success">
-                        Bearbeiten
-                    </a>
-                </td>
+                        <a href="{{ url_for('admin.gruppenleiter_bearbeiten', id=leiter.id) }}" class="btn btn-success">
+                            Bearbeiten
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -121,35 +114,33 @@
     </div>
 
     <h3>Neuen Gruppenleiter hinzufügen</h3>
+    <div class="table-container">
+        <form method="POST" action="{{ url_for('admin.add_gruppenleiter') }}" class="gruppenleiter-form">
+            <div class="form-grid">
+                <input type="text" name="vorname" placeholder="Vorname" required>
+                <input type="text" name="nachname" placeholder="Nachname" required>
+                <input type="date" name="geburtsdatum" required>
+                <input type="text" name="iban" placeholder="IBAN" required>
+                <input type="text" name="bic" placeholder="BIC" required>
+                <input type="text" name="bank" placeholder="Bank" required>
+                <input type="text" name="telefon" placeholder="Telefon" required>
 
-<div class="table-container">
-    <form method="POST" action="{{ url_for('admin.add_gruppenleiter') }}" class="gruppenleiter-form">
-        
-        <div class="form-grid">
-            <input type="text" name="vorname" placeholder="Vorname" required>
-            <input type="text" name="nachname" placeholder="Nachname" required>
-            <input type="date" name="geburtsdatum" required>
-            <input type="text" name="iban" placeholder="IBAN" required>
-            <input type="text" name="bic" placeholder="BIC" required>
-            <input type="text" name="bank" placeholder="Bank" required>
-            <input type="text" name="telefon" placeholder="Telefon" required>
+                <select name="gruppenrolle" required>
+                    <option value="">Gruppenrolle wählen</option>
+                    <option value="Jugendleiter">Jugendleiter</option>
+                    <option value="Helfer">Helfer</option>
+                </select>
 
-            <select name="gruppenrolle" required>
-                <option value="">Gruppenrolle wählen</option>
-                <option value="Jugendleiter">Jugendleiter</option>
-                <option value="Helfer">Helfer</option>
-            </select>
+                <select name="vereinsrolle" required>
+                    <option value="">Vereinsrolle wählen</option>
+                    <option value="keine">keine</option>
+                    <option value="Jugendausschuss">Jugendausschuss</option>
+                    <option value="Jugendreferent">Jugendreferent</option>
+                </select>
+            </div>
 
-            <select name="vereinsrolle" required>
-                <option value="">Vereinsrolle wählen</option>
-                <option value="keine">keine</option>
-                <option value="Jugendausschuss">Jugendausschuss</option>
-                <option value="Jugendreferent">Jugendreferent</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn-submit">Gruppenleiter hinzufügen</button>
-    </form>
-</div>
+            <button type="submit" class="btn-submit">Gruppenleiter hinzufügen</button>
+        </form>
+    </div>
 </section>
 {% endblock %}
