@@ -1,55 +1,101 @@
 {% extends "base_intern.html" %}
 
 {% block content %}
-<section class="admin">
+<section class="page-section">
     <h2>Gruppenleiter bearbeiten</h2>
 
-    <form method="POST" class="edit-teamer-form">
-        <div class="edit-teamer-grid">
+    <div class="form-card">
+        <form method="POST">
 
-            <div class="edit-teamer-section">
+            <div class="form-section">
                 <h3>Persönliche Daten</h3>
-                <label>Vorname</label>
-                <input type="text" name="vorname" value="{{ leiter.vorname }}">
-                <label>Nachname</label>
-                <input type="text" name="nachname" value="{{ leiter.nachname }}">
-                <label>Geburtsdatum</label>
-                <input type="date" name="geburtsdatum" value="{{ leiter.geburtsdatum }}">
-                <label>Telefon</label>
-                <input type="text" name="telefon" value="{{ leiter.telefon }}">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Vorname</label>
+                        <input type="text" name="vorname" value="{{ leiter.vorname }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nachname</label>
+                        <input type="text" name="nachname" value="{{ leiter.nachname }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Geburtsdatum</label>
+                        <input type="date" name="geburtsdatum" value="{{ leiter.geburtsdatum }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefon</label>
+                        <input type="text" name="telefon" value="{{ leiter.telefon }}">
+                    </div>
+
+                </div>
             </div>
 
-            <div class="edit-teamer-section">
+            <div class="form-section">
                 <h3>Bankdaten</h3>
-                <label>IBAN</label>
-                <input type="text" name="iban" value="{{ leiter.iban }}">
-                <label>BIC</label>
-                <input type="text" name="bic" value="{{ leiter.bic }}">
-                <label>Bank</label>
-                <input type="text" name="bank" value="{{ leiter.bank }}">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>IBAN</label>
+                        <input type="text" name="iban" value="{{ leiter.iban }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>BIC</label>
+                        <input type="text" name="bic" value="{{ leiter.bic }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bank</label>
+                        <input type="text" name="bank" value="{{ leiter.bank }}">
+                    </div>
+
+                </div>
             </div>
 
-            <div class="edit-teamer-section">
+            <div class="form-section">
                 <h3>Rollen</h3>
-                <label>Gruppenrolle</label>
-                <select name="gruppenrolle">
-                    <option value="Jugendleiter" {% if leiter.gruppenrolle=='Jugendleiter' %}selected{% endif %}>Jugendleiter</option>
-                    <option value="Helfer" {% if leiter.gruppenrolle=='Helfer' %}selected{% endif %}>Helfer</option>
-                </select>
 
-                <label>Vereinsrolle</label>
-                <select name="vereinsrolle">
-                    <option value="keine" {% if leiter.vereinsrolle=='keine' %}selected{% endif %}>keine</option>
-                    <option value="Jugendausschuss" {% if leiter.vereinsrolle=='Jugendausschuss' %}selected{% endif %}>Jugendausschuss</option>
-                    <option value="Jugendreferent" {% if leiter.vereinsrolle=='Jugendreferent' %}selected{% endif %}>Jugendreferent</option>
-                </select>
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Gruppenrolle</label>
+                        <select name="gruppenrolle">
+                            <option value="Jugendleiter" {% if leiter.gruppenrolle=='Jugendleiter' %}selected{% endif %}>
+                                Jugendleiter
+                            </option>
+                            <option value="Helfer" {% if leiter.gruppenrolle=='Helfer' %}selected{% endif %}>
+                                Helfer
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vereinsrolle</label>
+                        <select name="vereinsrolle">
+                            <option value="keine" {% if leiter.vereinsrolle=='keine' %}selected{% endif %}>keine</option>
+                            <option value="Jugendausschuss" {% if leiter.vereinsrolle=='Jugendausschuss' %}selected{% endif %}>
+                                Jugendausschuss
+                            </option>
+                            <option value="Jugendreferent" {% if leiter.vereinsrolle=='Jugendreferent' %}selected{% endif %}>
+                                Jugendreferent
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
             </div>
 
-        </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Speichern</button>
+            </div>
 
-        <div class="edit-teamer-actions">
-            <button type="submit">Speichern</button>
-        </div>
-    </form>
+        </form>
+    </div>
 </section>
 {% endblock %}

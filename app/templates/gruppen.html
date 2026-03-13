@@ -3,20 +3,23 @@
 {% block title %}Profil - JDAV Hildesheim{% endblock %}
 
 {% block content %}
-<section class="gruppe">
+<section class="page-section">
     <div class="cards">
         {% for gruppe in gruppen %}
         <a class="card" href="{{ url_for('gruppen.gruppe', gruppe_id=gruppe.id) }}">
             <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
+
             <div class="gruppe-info">
                 <div class="info-item">
                     <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
                 </div>
+
                 {% if gruppe.gruppenleiter %}
                 <div class="info-item">
                     <strong>Gruppenleiter:</strong> {{ gruppe.gruppenleiter | join(', ') }}
                 </div>
                 {% endif %}
+
                 {% if gruppe.mitglieder %}
                 <div class="info-item">
                     <strong>Teilnehmende:</strong> {{ gruppe.mitglieder | join(', ') }}
@@ -26,35 +29,62 @@
         </a>
         {% endfor %}
 
-        <form id="neue-gruppe-form" class="card neue-gruppe-card"
-              action="{{ url_for('gruppen.neue_gruppe') }}"
-              method="POST"
-              style="display:none;">
-            <label>Name: <input type="text" name="name" required></label>
-            <label>Beschreibung: <textarea name="beschreibung"></textarea></label>
-            <label>Wochentag:
-                <select name="wochentag" required>
-                    <option value="Montag">Montag</option>
-                    <option value="Dienstag">Dienstag</option>
-                    <option value="Mittwoch">Mittwoch</option>
-                    <option value="Donnerstag">Donnerstag</option>
-                    <option value="Freitag">Freitag</option>
-                    <option value="Samstag">Samstag</option>
-                    <option value="Sonntag">Sonntag</option>
-                </select>
-            </label>
-            <label>Startzeit:
-                <input type="time" name="startzeit" required>
-            </label>
-            <label>Endzeit:
-                <input type="time" name="endzeit" required>
-            </label>
-            <button type="submit">Gruppe erstellen</button>
-        </form>
+        <div class="form-card" id="neue-gruppe-form" style="display:none;">
+            <form method="POST" action="{{ url_for('gruppen.neue_gruppe') }}">
+
+                <div class="form-section">
+                    <h3>Neue Gruppe</h3>
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Beschreibung</label>
+                            <textarea name="beschreibung"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Wochentag</label>
+                            <select name="wochentag" required>
+                                <option value="Montag">Montag</option>
+                                <option value="Dienstag">Dienstag</option>
+                                <option value="Mittwoch">Mittwoch</option>
+                                <option value="Donnerstag">Donnerstag</option>
+                                <option value="Freitag">Freitag</option>
+                                <option value="Samstag">Samstag</option>
+                                <option value="Sonntag">Sonntag</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Startzeit</label>
+                            <input type="time" name="startzeit" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Endzeit</label>
+                            <input type="time" name="endzeit" required>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Gruppe erstellen</button>
+                </div>
+
+            </form>
+        </div>
     </div>
 
     {% if check_user(3) %}
-    <button id="neue-gruppe-btn" class="btn-submit">Neue Gruppe erstellen</button>
+    <button id="neue-gruppe-btn" class="btn-submit">
+        Neue Gruppe erstellen
+    </button>
     {% endif %}
 </section>
 

@@ -3,7 +3,7 @@
 {% block title %}Admin Dashboard - JDAV Hildesheim{% endblock %}
 
 {% block content %}
-<section class="admin">
+<section class="page-section">
     <h1>Admin Dashboard</h1>
 
     <h3>Accounts</h3>
@@ -50,8 +50,13 @@
                             </button>
                             {% endif %}
 
-                            <button type="submit" name="action" value="delete" class="btn-delete"
-                                    onclick="return confirm('Delete this account permanently?');">
+                            <button
+                                type="submit"
+                                name="action"
+                                value="delete"
+                                class="btn-delete"
+                                onclick="return confirm('Delete this account permanently?');"
+                            >
                                 Delete
                             </button>
                         </form>
@@ -97,13 +102,18 @@
                     <td>{{ leiter.telefon }}</td>
                     <td>{{ leiter.gruppenrolle }}</td>
                     <td>{{ leiter.vereinsrolle }}</td>
+
                     {% if leiter.jugendgruppen %}
                     <td>{{ leiter.jugendgruppen.replace(',', '<br>') | safe }}</td>
                     {% else %}
                     <td>Noch keine gruppen</td>
                     {% endif %}
+
                     <td>
-                        <a href="{{ url_for('admin.gruppenleiter_bearbeiten', id=leiter.id) }}" class="btn btn-success">
+                        <a
+                            href="{{ url_for('admin.gruppenleiter_bearbeiten', id=leiter.id) }}"
+                            class="btn btn-success"
+                        >
                             Bearbeiten
                         </a>
                     </td>
@@ -114,32 +124,77 @@
     </div>
 
     <h3>Neuen Gruppenleiter hinzufügen</h3>
-    <div class="table-container">
-        <form method="POST" action="{{ url_for('admin.add_gruppenleiter') }}" class="gruppenleiter-form">
-            <div class="form-grid">
-                <input type="text" name="vorname" placeholder="Vorname" required>
-                <input type="text" name="nachname" placeholder="Nachname" required>
-                <input type="date" name="geburtsdatum" required>
-                <input type="text" name="iban" placeholder="IBAN" required>
-                <input type="text" name="bic" placeholder="BIC" required>
-                <input type="text" name="bank" placeholder="Bank" required>
-                <input type="text" name="telefon" placeholder="Telefon" required>
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('admin.add_gruppenleiter') }}">
 
-                <select name="gruppenrolle" required>
-                    <option value="">Gruppenrolle wählen</option>
-                    <option value="Jugendleiter">Jugendleiter</option>
-                    <option value="Helfer">Helfer</option>
-                </select>
+            <div class="form-section">
+                <h3>Gruppenleiter hinzufügen</h3>
 
-                <select name="vereinsrolle" required>
-                    <option value="">Vereinsrolle wählen</option>
-                    <option value="keine">keine</option>
-                    <option value="Jugendausschuss">Jugendausschuss</option>
-                    <option value="Jugendreferent">Jugendreferent</option>
-                </select>
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Vorname</label>
+                        <input type="text" name="vorname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nachname</label>
+                        <input type="text" name="nachname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Geburtsdatum</label>
+                        <input type="date" name="geburtsdatum" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>IBAN</label>
+                        <input type="text" name="iban" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>BIC</label>
+                        <input type="text" name="bic" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bank</label>
+                        <input type="text" name="bank" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefon</label>
+                        <input type="text" name="telefon" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gruppenrolle</label>
+                        <select name="gruppenrolle" required>
+                            <option value="">Gruppenrolle wählen</option>
+                            <option value="Jugendleiter">Jugendleiter</option>
+                            <option value="Helfer">Helfer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vereinsrolle</label>
+                        <select name="vereinsrolle" required>
+                            <option value="">Vereinsrolle wählen</option>
+                            <option value="keine">keine</option>
+                            <option value="Jugendausschuss">Jugendausschuss</option>
+                            <option value="Jugendreferent">Jugendreferent</option>
+                        </select>
+                    </div>
+
+                </div>
             </div>
 
-            <button type="submit" class="btn-submit">Gruppenleiter hinzufügen</button>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                    Gruppenleiter hinzufügen
+                </button>
+            </div>
+
         </form>
     </div>
 </section>

@@ -1,61 +1,117 @@
 {% extends "base_intern.html" %}
 
 {% block content %}
-<section class="admin">
+<section class="page-section">
     <h2>Mitglied bearbeiten</h2>
 
-    <form method="POST" class="edit-member-form">
-        <div class="edit-member-grid">
+    <div class="form-card">
+        <form method="POST">
 
-            <div class="edit-member-section">
+            <div class="form-section">
                 <h3>Mitglied</h3>
-                <label>Vorname</label>
-                <input type="text" name="vorname" value="{{ mitglied.vorname }}">
-                <label>Nachname</label>
-                <input type="text" name="nachname" value="{{ mitglied.nachname }}">
-                <label>Geburtsdatum</label>
-                <input type="date" name="geburtsdatum" value="{{ mitglied.geburtsdatum }}">
-                <label>Geschlecht</label>
-                <select name="geschlecht">
-                    <option value="m" {% if mitglied.geschlecht=='m' %}selected{% endif %}>Männlich</option>
-                    <option value="w" {% if mitglied.geschlecht=='w' %}selected{% endif %}>Weiblich</option>
-                    <option value="d" {% if mitglied.geschlecht=='d' %}selected{% endif %}>Divers</option>
-                </select>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Vorname</label>
+                        <input type="text" name="vorname" value="{{ mitglied.vorname }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nachname</label>
+                        <input type="text" name="nachname" value="{{ mitglied.nachname }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Geburtsdatum</label>
+                        <input type="date" name="geburtsdatum" value="{{ mitglied.geburtsdatum }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Geschlecht</label>
+                        <select name="geschlecht">
+                            <option value="m" {% if mitglied.geschlecht=='m' %}selected{% endif %}>
+                                Männlich
+                            </option>
+                            <option value="w" {% if mitglied.geschlecht=='w' %}selected{% endif %}>
+                                Weiblich
+                            </option>
+                            <option value="d" {% if mitglied.geschlecht=='d' %}selected{% endif %}>
+                                Divers
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="edit-member-section">
+            <div class="form-section">
                 <h3>Adresse</h3>
-                <label>Straße</label>
-                <input type="text" name="strasse" value="{{ mitglied.strasse }}">
-                <label>Hausnummer</label>
-                <input type="text" name="hausnummer" value="{{ mitglied.hausnummer }}">
-                <label>PLZ</label>
-                <input type="text" name="plz" value="{{ mitglied.plz }}">
-                <label>Ort</label>
-                <input type="text" name="ort" value="{{ mitglied.ort }}">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Straße</label>
+                        <input type="text" name="strasse" value="{{ mitglied.strasse }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hausnummer</label>
+                        <input type="text" name="hausnummer" value="{{ mitglied.hausnummer }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>PLZ</label>
+                        <input type="text" name="plz" value="{{ mitglied.plz }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ort</label>
+                        <input type="text" name="ort" value="{{ mitglied.ort }}">
+                    </div>
+
+                </div>
             </div>
 
-            <div class="edit-member-section">
+            <div class="form-section">
                 <h3>Erziehungsberechtigte</h3>
-                {% for eb in erziehungsberechtigte %}
-                <input type="hidden" name="eb_id" value="{{ eb.id }}">
-                <label>Vorname</label>
-                <input type="text" name="eb_vorname" value="{{ eb.vorname }}">
-                <label>Nachname</label>
-                <input type="text" name="eb_nachname" value="{{ eb.nachname }}">
-                <label>Email</label>
-                <input type="email" name="eb_email" value="{{ eb.email }}">
-                <label>Telefon</label>
-                <input type="text" name="eb_telefon" value="{{ eb.telefon }}">
-                <hr>
-                {% endfor %}
+
+                <div class="form-grid">
+
+                    {% for eb in erziehungsberechtigte %}
+
+                    <input type="hidden" name="eb_id" value="{{ eb.id }}">
+
+                    <div class="form-group">
+                        <label>Vorname</label>
+                        <input type="text" name="eb_vorname" value="{{ eb.vorname }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nachname</label>
+                        <input type="text" name="eb_nachname" value="{{ eb.nachname }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="eb_email" value="{{ eb.email }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefon</label>
+                        <input type="text" name="eb_telefon" value="{{ eb.telefon }}">
+                    </div>
+
+                    {% endfor %}
+
+                </div>
             </div>
 
-        </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Speichern</button>
+            </div>
 
-        <div class="edit-member-actions">
-            <button type="submit">Speichern</button>
-        </div>
-    </form>
+        </form>
+    </div>
 </section>
 {% endblock %}

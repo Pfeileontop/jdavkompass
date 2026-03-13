@@ -15,6 +15,57 @@ body {
     margin: 0;
 }
 
+.page-section {
+  padding: 3rem 1.5rem 4rem 1.5rem;
+  background-color: #f8fafc;
+  min-height: 45vh;
+}
+
+.form-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 900px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section h3 {
+    margin-bottom: 15px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 8px;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.btn-submit {
+    padding: 5px 9px;
+}
+
 h1 {
   font-size: 2em;
   margin-block: 0.67em;
@@ -46,7 +97,6 @@ button {
     color: white;
     border: none;
     padding: 16px 20px;
-    margin-top: 2rem;
     font-size: 14px;
     border-radius: 6px;
     cursor: pointer;
@@ -154,30 +204,6 @@ button {
     color: var(--color-highlight);
 }
 
-/* DASHBOARD */
-.dashboard {
-    padding: 3rem 1.5rem 4rem 1.5rem;
-    background-color: #f8fafc;
-    min-height: 80vh;
-}
-
-.dashboard h1 {
-    font-family: var(--font-titillium);
-    font-size: 2.2rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-color-darkgrey);
-}
-
-.dashboard h3 {
-    color: var(--text-color-grey);
-    font-weight: 500;
-    margin-bottom: 2rem;
-}
-
-.dashboard > h3:not(:first-of-type) {
-    margin-top: 3rem;
-}
-
 .gruppe-info {
     margin-top: 1rem;
     display: flex;
@@ -196,66 +222,6 @@ button {
 
 .gruppe-titel {
     color: var(--color-highlight);
-}
-
-/* GRUPPEN */
-.gruppe {
-    padding: 3rem 1.5rem 4rem 1.5rem;
-    background-color: #f8fafc;
-    min-height: 45vh;
-}
-
-.gruppe .card {
-    max-width: 250px;
-}
-
-.neue-gruppe-card {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.neue-gruppe-card label {
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-color-grey);
-    gap: 6px;
-}
-
-.neue-gruppe-card input,
-.neue-gruppe-card textarea,
-.neue-gruppe-card select {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-family: var(--font-sans);
-}
-
-.neue-gruppe-card input:focus,
-.neue-gruppe-card textarea:focus,
-.neue-gruppe-card select:focus {
-    outline: none;
-    border-color: var(--button-color);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
-}
-
-.neue-gruppe-card textarea {
-    resize: vertical;
-    min-height: 50px;
-}
-
-/* Gruppendetails */
-.gruppe-detail {
-    padding: 3rem 1.5rem 4rem 1.5rem;
-    background-color: #f8fafc;
-    min-height: 45vh;
-}
-
-.gruppe-detail button {
-    margin-top: 0;
 }
 
 .gruppe-actions {
@@ -360,14 +326,6 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-/* Mitgliederübersicht */
-
-.mitgliederue {
-    padding: 3rem 1.5rem 4rem 1.5rem;
-    background-color: #f8fafc;
-    min-height: 45vh;
-}
-
 .mitglieder-container {
     margin-top: 3rem;
 }
@@ -390,14 +348,6 @@ input[type="checkbox"] {
     padding: 10px 12px;
     border-bottom: 1px solid #f1f1f1;
     font-size: 14px;
-}
-
-
-/* admin */
-.admin {
-    padding: 3rem 1.5rem 4rem 1.5rem;
-    background-color: #f8fafc;
-    min-height: 80vh;
 }
 
 .inline-form {
@@ -428,58 +378,10 @@ input[type="checkbox"] {
     margin: 0;
 }
 
-/* Gruppenleiter Form */
-
-.gruppenleiter-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
-}
-
-.gruppenleiter-form input,
-.gruppenleiter-form select {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-family: var(--font-sans);
-    background: white;
-}
-
-.gruppenleiter-form input:focus,
-.gruppenleiter-form select:focus {
-    outline: none;
-    border-color: var(--color-highlight);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
-}
-
-.gruppenleiter-form button {
-    align-self: flex-start;
-}
-
-.profile {
-    padding: 3rem 1.5rem 4rem 1.5rem;
-    background-color: #f8fafc;
-    min-height: 80vh;
-}
-
-.profile-form form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 350px;
-}
-
-.profile-form input {
-    padding: 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
 }
 
 .success { color: var(--color-highlight); }
@@ -492,46 +394,8 @@ input[type="checkbox"] {
     gap: 24px;
 }
 
-.edit-member-section {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.edit-member-section h3 {
-    color: var(--color-highlight);
-    margin-bottom: 8px;
-    font-size: 16px;
-}
-
-.edit-member-section label {
-    font-size: 13px;
-    color: var(--text-color-grey);
-}
-
-.edit-member-section input,
-.edit-member-section select {
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-}
-
-.edit-member-section input:focus,
-.edit-member-section select:focus {
-    outline: none;
-    border-color: var(--color-highlight);
-}
-
 .edit-member-actions {
     display: flex;
     justify-content: flex-end;
     margin-top: 16px;
-}
-
-/* Responsiv: untereinander auf kleinen Bildschirmen */
-@media (max-width: 1024px) {
-    .edit-member-grid {
-        grid-template-columns: 1fr;
-    }
 }
