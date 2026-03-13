@@ -51,7 +51,7 @@ def search_gruppenleiter():
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>", methods=["GET", "POST"])
-def gruppe_detail(gruppe_id):
+def gruppe(gruppe_id):
     if not check_user(1):
         return redirect(url_for("auth.login"))
 
@@ -141,7 +141,7 @@ WHERE id = ?
     conn.close()
 
     return render_template(
-        "gruppe_detail.html",
+        "gruppe.html",
         today_name=today_name,
         gruppe=gruppe,
         mitglieder=mitglieder,
@@ -221,7 +221,7 @@ def mitglied_zu_gruppe(gruppe_id, mitglied_id):
         conn.commit()
         conn.close()
 
-    return redirect(url_for("gruppen.gruppe_detail", gruppe_id=gruppe_id))
+    return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
 
 @gruppen_bp.route("/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"])
@@ -247,7 +247,7 @@ def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
 
     conn.close()
 
-    return redirect(url_for("gruppen.gruppe_detail", gruppe_id=gruppe_id))
+    return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"])
@@ -260,7 +260,7 @@ def mitglied_entfernen(gruppe_id, mitglied_id):
     conn.commit()
     conn.close()
 
-    return redirect(url_for('gruppen.gruppe_detail', gruppe_id=gruppe_id))
+    return redirect(url_for('gruppen.gruppe', gruppe_id=gruppe_id))
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen", methods=["POST"])
@@ -275,7 +275,7 @@ def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
     conn.commit()
     conn.close()
 
-    return redirect(url_for('gruppen.gruppe_detail', gruppe_id=gruppe_id))
+    return redirect(url_for('gruppen.gruppe', gruppe_id=gruppe_id))
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/download_attendance", methods=["GET"])
 def download_attendance(gruppe_id):

@@ -9,7 +9,7 @@ mitgliederregistrierung_bp = Blueprint('mitgliederregistrierung', __name__)
 @mitgliederregistrierung_bp.route("/tnanmelden", methods=["GET", "POST"])
 def tnanmelden():
     if request.method == "GET":
-        return render_template("tnameldung.html")
+        return render_template("anmeldung.html")
 
     # POST: Daten aus Formular
     mitglied_vorname = request.form.get("mitglied_vorname")
@@ -62,8 +62,8 @@ def tnanmelden():
 
 
 
-@mitgliederregistrierung_bp.route("/mitgliederuebersicht", methods=["GET", "POST"])
-def mitgliederuebersicht():
+@mitgliederregistrierung_bp.route("/mitglieder", methods=["GET", "POST"])
+def mitglieder():
     if not check_user(3):
         return redirect(url_for("auth.login"))
 
@@ -117,7 +117,7 @@ def mitgliederuebersicht():
         conn.close()
 
         return render_template(
-        "mitgliederuebersicht.html",
+        "mitglieder.html",
         mitglieder_unapproved_daten=mitglieder_unapproved_daten,
         mitglieder_daten=mitglieder_daten
         )
@@ -128,7 +128,7 @@ def mitgliederuebersicht():
         action = request.form.get("action")
 
         if not mitglied_id:
-            return redirect(url_for("mitgliederregistrierung.mitgliederuebersicht"))
+            return redirect(url_for("mitgliederregistrierung.mitglieder"))
 
         conn = get_kompass()
         cursor = conn.cursor()
@@ -246,7 +246,7 @@ def mitgliederuebersicht():
         conn.commit()
         conn.close()
 
-        return redirect(url_for("mitgliederregistrierung.mitgliederuebersicht"))
+        return redirect(url_for("mitgliederregistrierung.mitglieder"))
 
     conn.close()
 
@@ -384,4 +384,4 @@ def mitglied_bearbeiten(id):
         conn.commit()
         conn.close()
 
-        return redirect(url_for("mitgliederregistrierung.mitgliederuebersicht"))
+        return redirect(url_for("mitgliederregistrierung.mitglieder"))

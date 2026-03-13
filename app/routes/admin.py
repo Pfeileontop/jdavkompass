@@ -122,7 +122,7 @@ def add_gruppenleiter():
 
 
 @admin_bp.route("/gruppenleiter/<int:id>/edit", methods=["GET", "POST"])
-def edit_gruppenleiter(id):
+def gruppenleiter_bearbeiten(id):
     if not check_user(4):
         return redirect(url_for("auth.login"))
 
@@ -158,4 +158,4 @@ def edit_gruppenleiter(id):
     ).fetchone()
 
     conn.close()
-    return render_template("edit_gruppenleiter.html", leiter=leiter)
+    return render_template("gruppenleiter_bearbeiten.html", leiter=leiter)
