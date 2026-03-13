@@ -16,14 +16,16 @@ body {
 }
 
 .page-section {
-  padding: 3rem 1.5rem 4rem 1.5rem;
-  background-color: #f8fafc;
+  padding: 2rem 1.5rem 4rem 2.5rem;
+  background-color: var(--color-background);
   min-height: 45vh;
+  width: 100%;
 }
 
 .form-card {
     background: white;
     padding: 25px;
+    padding-left: 0px;
     border-radius: 10px;
     max-width: 900px;
 }
@@ -62,26 +64,39 @@ body {
     margin-top: 20px;
 }
 
-.btn-submit {
-    padding: 5px 9px;
+.form-card.flex form {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.form-card.flex .form-section {
+    flex: 1 1 250px;
+}
+
+.form-card.flex .form-section .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+h1, h2, h3 {
+    font-weight: bold;
+    line-height: 1.2;
+    margin-top: 0;
+    margin-bottom: 0.75em;
 }
 
 h1 {
-  font-size: 2em;
-  margin-block: 0.67em;
-  font-weight: bold;
+    font-size: 2rem;
 }
 
 h2 {
-  font-size: 1.5em;
-  margin-block: 0.83em;
-  font-weight: bold;
+    font-size: 1.5rem;
 }
 
 h3 {
-  font-size: 1.17em;
-  margin-block: 1em;
-  font-weight: bold;
+    font-size: 1.17rem;
 }
 
 p {
@@ -186,7 +201,6 @@ button {
     width: 100%;
     max-width: 1200px;
     margin: 0;
-    justify-content: left;
 }
 
 .card {
@@ -224,16 +238,6 @@ button {
     color: var(--color-highlight);
 }
 
-.gruppe-actions {
-    display: flex;
-    flex-direction: row;
-    gap: 1.5rem;
-}
-
-.action-item {
-    margin: auto;
-}
-
 .btn-delete,
 .btn-remove {
     background-color: var(--color-highlight-red);
@@ -242,13 +246,25 @@ button {
 
 .btn-submit {
     padding: 8px 10px;
+    margin-top: 1em;
 }
 
 .table-container {
     max-width: 1100px;
-    margin: 40px auto;
-    margin-bottom: 5rem;
+    margin-left: 0;
+    margin-bottom: 3rem;
 }
+
+.anwesenheitsliste {
+    margin-left: 0;
+    overflow-x: auto;
+}
+
+.anwesenheitsliste table {
+    table-layout: fixed;
+    align-items: left;
+}
+
 
 .table {
     width: 100%;

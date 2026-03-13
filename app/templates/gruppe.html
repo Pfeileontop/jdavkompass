@@ -6,7 +6,7 @@
     <p>Gruppenalter {{ avg_age }} Jahre</p>
     <p>{{ gruppe['wochentag'] }} {{ gruppe.startzeit }} - {{ gruppe.endzeit }}</p>
 
-    <div class="table-container">
+    <div class="table-container anwesenheitsliste">
         <h3>Anwesenheitsliste</h3>
         <form method="post" id="attendance-form">
             <table class="table">
@@ -30,7 +30,7 @@
                     <tr>
                         <td>{{ mitglied[1] }} {{ mitglied[2] }}</td>
                         {% for datum in alle_daten %}
-                        <td class="center historie">
+                        <td class="historie">
                             {% if anwesenheitshistorie.get(mitglied[0], {}).get(datum) %}
                             ✅
                             {% else %}
@@ -40,14 +40,14 @@
                         {% endfor %}
 
                         {% if today_name == gruppe['wochentag'] and check_user(2) %}
-                        <td class="center">
+                        <td>
                             <input type="checkbox"
                                    name="mitglied_{{ mitglied[0] }}"
                                    {% if anwesenheitheute.get(mitglied[0]) %}checked{% endif %}>
                         </td>
                         {% endif %}
 
-                        <td class="center">
+                        <td>
                             {% if mitglied[4] %}
                             {{ mitglied[4] }}
                             {% else %}
@@ -56,7 +56,7 @@
                         </td>
 
                         {% if check_user(3) %}
-                        <td class="center">
+                        <td>
                             <button class="btn-remove" type="submit"
                                     form="remove-member-{{ mitglied[0] }}">
                                 aus Gruppe entfernen
@@ -70,7 +70,7 @@
                     <tr class="gruppenleiter">
                         <td>{{ gruppenleiter[1] }} {{ gruppenleiter[2] }}</td>
                         {% for datum in alle_daten %}
-                        <td class="center historie">
+                        <td class="historie">
                             {% if gruppenleiter_anwesenheithistorie.get(gruppenleiter[0], {}).get(datum) %}
                             ✅
                             {% else %}
@@ -80,7 +80,7 @@
                         {% endfor %}
 
                         {% if today_name == gruppe['wochentag'] %}
-                        <td class="center">
+                        <td>
                             <input type="checkbox"
                                    name="gruppenleiter_{{ gruppenleiter[0] }}"
                                    {% if gruppenleiter_anwesenheitheute.get(gruppenleiter[0]) %}checked{% endif %}>
@@ -90,7 +90,7 @@
                         <td></td>
 
                         {% if check_user(3) %}
-                        <td class="center">
+                        <td>
                             <button class="btn-remove" type="submit"
                                     form="remove-leader-{{ gruppenleiter[0] }}">
                                 aus Gruppe entfernen
@@ -138,10 +138,6 @@
         </form>
         {% endfor %}
     </div>
-
-    {% if check_user(2) %}
-    <h2>weitere Optionen</h2>
-    {% endif %}
 
     <div class="gruppe-actions">
         {% if check_user(3) %}
