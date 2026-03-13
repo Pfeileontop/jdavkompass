@@ -1,0 +1,119 @@
+{% extends "base_extern.html" %}
+{% block title %}Anmeldung | JDAV Hildesheim{% endblock %}
+{% block content %}
+<h1>Teilnehmeranmeldung</h1>
+<p>Bitte gebe hier alle Daten für das anzumeldene Mitglied ein. Sollten sich in Zukunft Daten ändern, bitte teile dies den Gruppenleitenden mit. Für eine Teilname an einer Jugendgruppe ist eine Mitgliedschaft im DAV erforderlich.</p>
+<form action="{{ url_for('mitgliederregistrierung.tnanmelden') }}" method="POST">
+    <fieldset>
+        <legend>Teilnehmer</legend>
+        <label>Vorname: <input type="text" name="mitglied_vorname" required></label><br>
+        <label>Nachname: <input type="text" name="mitglied_nachname" required></label><br>
+        <label>Geburtsdatum: <input type="date" name="mitglied_geburtsdatum" required></label><br>
+        <label>Geschlecht:
+            <select name="mitglied_geschlecht">
+                <option value="m">Männlich</option>
+                <option value="w">Weiblich</option>
+                <option value="d">Divers</option>
+            </select>
+        </label><br>
+    </fieldset>
+
+    <fieldset>
+        <legend>Adresse</legend>
+        <label>Straße: <input type="text" name="strasse" required></label><br>
+        <label>Hausnummer: <input type="text" name="hausnummer" required></label><br>
+        <label>PLZ: <input type="text" name="plz" required></label><br>
+        <label>Ort: <input type="text" name="ort" required></label><br>
+    </fieldset>
+
+    <fieldset>
+        <legend>Erziehungsberechtigte/r</legend>
+        <label>Vorname: <input type="text" name="eb_vorname" required></label><br>
+        <label>Nachname: <input type="text" name="eb_nachname" required></label><br>
+        <label>E-Mail: <input type="email" name="eb_email" required></label><br>
+        <label>Telefon (Notfallkontakt): <input type="tel" name="eb_telefon" required></label><br>
+    </fieldset>
+
+    <fieldset>
+        <legend>Unterschrift *Pflichtfeld</legend>
+        <label>Bitte im unteren Feld entweder per Finger, sonder per Maus eine Unterschrift angeben.</label><br>
+        <label>Mit einer Unterschrift und mit dem Anmelden des Teilnehmers bestätige ich die Richtigkeit meiner Angaben. Ich bin damit einverstanden, dass während Gruppenaktivitäen Bild und Videomaterial von Gruppenleitenden aufgenommen und für die Medien der JDAV Hildesheim verwendet werden dürfen. Für die Person die ich anmelde existiert eine Mitgliedschaft im DAV. Ich bin damit einverstanden, dass meine Daten digital intern verarbeitet werden und zum Zwecke der Gruppenorganisation gespeichert werden. Ich bin mit den Kosten der Teilname einverstanden. Ich bin für Person, die ich anmelde erziehugsberechtigt.</label>
+        <canvas id="signature-pad" style="border: 1px solid #ccc;"></canvas><br>
+        <button type="button" onclick="clearSignature()">Unterschrift löschen</button>
+        <input type="hidden" name="unterschrift" id="unterschrift">
+    </fieldset>
+
+        <button type="submit" class="btn-submit">Teilnehmer anmelden</button>
+</form>
+<script>
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    const hiddenInput = document.getElementById('unterschrift');
+    const form = canvas.closest("form");
+    let isDrawing = false;
+
+    function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000";
+    }
+
+    window.addEventListener("load", resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
+
+    function getPosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const pos = getPosition(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        const pos = getPosition(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+        hiddenInput.value = canvas.toDataURL();
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        isDrawing = false;
+    });
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hiddenInput.value = '';
+    }
+
+    function isCanvasEmpty() {
+        const blank = document.createElement('canvas');
+        blank.width = canvas.width;
+        blank.height = canvas.height;
+        return canvas.toDataURL() === blank.toDataURL();
+    }
+
+    form.addEventListener("submit", function(e) {
+        if (isCanvasEmpty()) {
+            e.preventDefault();
+            alert("Bitte unterschreiben Sie im vorgesehenen Feld.");
+        } else {
+            hiddenInput.value = canvas.toDataURL();
+        }
+    });
+</script>
+{% endblock %}

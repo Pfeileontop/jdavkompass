@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}JDAV Hildesheim Kompass{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cssintern.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container logo">
+            <a href="/"><img src="{{ url_for('static', filename='img/jdavlogo_grau.png') }}" alt="JDAV Logo"> Kompass</a>
+        </div>
+
+        <nav aria-label="Hauptnavigation">
+            <ul id="nav-links" class="container">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/gruppen">Gruppen</a></li>
+                {% if check_user(3) %}
+                <li><a href="/mitgliederuebersicht">Mitglieder</a></li>
+                {% endif %}
+                {% if check_user(4) %}
+                <li><a href="/admin">Admin</a></li>
+                {% endif %}
+                <li><a href="/profile">Profil</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="site-main container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer container">
+        <p>Notfallkontakt: Henri Meyer-Gauen <br> henri.meyer-gauen@jdav-hildesheim.de <br> &copy; 2026 JDAV Hildesheim. Alle Rechte vorbehalten.</p>
+        
+    </footer>
+</body>
+</html>

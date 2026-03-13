@@ -1,0 +1,106 @@
+{% extends "base_intern.html" %}
+
+{% block title %}Dashboard - JDAV Hildesheim{% endblock %}
+
+{% block content %}
+<section class="mitgliederue">
+    <div class="mitglieder-container">
+        <h2>Mitglieder Genehmigen</h2>
+
+        {% if mitglieder_unapproved_daten %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Vorname</th>
+                    <th>Nachname</th>
+                    <th>Geburtsdatum</th>
+                    <th>Unterschrift</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mitglied in mitglieder_unapproved_daten %}
+                <tr>
+                    <td>{{ mitglied.id }}</td>
+                    <td>{{ mitglied.vorname }}</td>
+                    <td>{{ mitglied.nachname }}</td>
+                    <td>{{ mitglied.geburtsdatum }}</td>
+                    <td>
+                        {% if mitglied.unterschrift %}
+                            <img src="{{ mitglied.unterschrift }}" alt="Unterschrift" width="200">
+                        {% else %}
+                            Keine Unterschrift
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('mitgliederregistrierung.mitgliederuebersicht') }}" method="POST" style="display:flex; gap:5px;">
+                            <input type="hidden" name="mitglied_id" value="{{ mitglied.id }}">    
+                            <button type="submit" name="action" value="approve" class="btn btn-success">
+                                Genehmigen
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-remove">
+                                Ablehnen
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            Keine Mitglieder zur Genehmigung gefunden.
+        </div>
+        {% endif %}
+    </div>
+
+<div class="mitglieder-container">
+    <h2>Alle Mitglieder</h2>
+
+    {% if mitglieder_daten %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vorname</th>
+                <th>Nachname</th>
+                <th>Geburtsdatum</th>
+                <th>Gruppen</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mitglied in mitglieder_daten %}
+            <tr>
+                <td>{{ mitglied.id }}</td>
+                <td>{{ mitglied.vorname }}</td>
+                <td>{{ mitglied.nachname }}</td>
+                <td>{{ mitglied.geburtsdatum }}</td>
+                <td>
+                    {% if mitglied.gruppen %}
+                        {{ mitglied.gruppen }}
+                    {% else %}
+                        Keine Gruppe
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('mitgliederregistrierung.mitglied_bearbeiten', id=mitglied.id) }}" 
+                    class="btn btn-primary">
+                        Bearbeiten
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info">
+        Keine Mitglieder vorhanden.
+    </div>
+    {% endif %}
+</div>
+</section>
+
+
+{% endblock %}

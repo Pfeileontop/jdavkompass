@@ -1,0 +1,35 @@
+{% extends "base_intern.html" %}
+
+{% block title %}Profil - JDAV Hildesheim{% endblock %}
+
+{% block content %}
+<section class="profile">
+    <h1>Mein Profil</h1>
+
+    <div class="profile-info">
+        <p><strong>Benutzername:</strong> {{ user[1] }}</p>
+    </div>
+
+    <div class="profile-form">
+        <h2>Passwort ändern</h2>
+        {% if success %}
+            <p class="success">{{ success }}</p>
+        {% endif %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('profile.profile') }}">
+            <label for="old_password">Altes Passwort:</label>
+            <input type="password" name="old_password" id="old_password" required>
+
+            <label for="new_password">Neues Passwort:</label>
+            <input type="password" name="new_password" id="new_password" required>
+
+            <label for="confirm_password">Neues Passwort bestätigen:</label>
+            <input type="password" name="confirm_password" id="confirm_password" required>
+
+            <button type="submit">Passwort ändern</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
