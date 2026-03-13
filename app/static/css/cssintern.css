@@ -359,24 +359,5 @@ input[type="checkbox"] {
     margin: 0;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-}
-
 .success { color: var(--color-highlight); }
 .error { color: var(--color-highlight-red); }
-
-
-.edit-member-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-.edit-member-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 16px;
-}
