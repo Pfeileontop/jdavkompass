@@ -6,8 +6,8 @@ from app.routes.auth import check_user
 mitgliederregistrierung_bp = Blueprint('mitgliederregistrierung', __name__)
 
 
-@mitgliederregistrierung_bp.route("/tnanmelden", methods=["GET", "POST"])
-def tnanmelden():
+@mitgliederregistrierung_bp.route("/anmeldung", methods=["GET", "POST"])
+def anmeldung():
     if request.method == "GET":
         return render_template("anmeldung.html")
 
