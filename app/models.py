@@ -1,5 +1,4 @@
 import sqlite3
-from flask import g
 from werkzeug.security import generate_password_hash
 from flask import session
 from contextlib import contextmanager
@@ -200,9 +199,11 @@ def get_accounts():
     finally:
         conn.close()
 
-
+@contextmanager
 def get_kompass():
-    if 'kompass_db' not in g:
-        g.kompass_db = sqlite3.connect("app/db/kompass.db")
-        g.kompass_db.row_factory = sqlite3.Row
-    return g.kompass_db
+        conn = sqlite3.connect("app/db/kompass.db")
+        conn.row_factory = sqlite3.Row
+        try:
+                yield conn
+        finally:
+                conn.close()

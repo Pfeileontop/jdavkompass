@@ -52,34 +52,30 @@ def admin():
     # -------------------------
     # Load gruppenleiter data
     # -------------------------
-    conn = get_kompass()
-    cursor = conn.cursor()
+    with get_kompass() as conn:
+        cursor = conn.cursor()
 
-    gruppenleiter = cursor.execute(
-        """
-        SELECT
-            gl.id,
-            gl.vorname,
-            gl.nachname,
-            gl.geburtsdatum,
-            gl.iban,
-            gl.bic,
-            gl.bank,
-            gl.telefon,
-            gl.gruppenrolle,
-            gl.vereinsrolle,
-            GROUP_CONCAT(jg.name, ', ') AS jugendgruppen
-        FROM gruppenleiter gl
-        LEFT JOIN gruppenleiter_jugendgruppen gj
-            ON gl.id = gj.gruppenleiter_id
-        LEFT JOIN jugendgruppen jg
-            ON gj.jugendgruppe_id = jg.id
-        GROUP BY gl.id
-        ORDER BY gl.nachname
-        """
-    ).fetchall()
-
-    conn.close()
+        gruppenleiter = cursor.execute("""
+            SELECT
+                gl.id,
+                gl.vorname,
+                gl.nachname,
+                gl.geburtsdatum,
+                gl.iban,
+                gl.bic,
+                gl.bank,
+                gl.telefon,
+                gl.gruppenrolle,
+                gl.vereinsrolle,
+                GROUP_CONCAT(jg.name, ', ') AS jugendgruppen
+            FROM gruppenleiter gl
+            LEFT JOIN gruppenleiter_jugendgruppen gj
+                ON gl.id = gj.gruppenleiter_id
+            LEFT JOIN jugendgruppen jg
+                ON gj.jugendgruppe_id = jg.id
+            GROUP BY gl.id
+            ORDER BY gl.nachname
+        """).fetchall()
 
     return render_template(
         "admin.html",
@@ -93,27 +89,24 @@ def add_gruppenleiter():
         return redirect(url_for("auth.login"))
 
     if request.method == "POST":
-        conn = get_kompass()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            INSERT INTO gruppenleiter 
-            (vorname, nachname, geburtsdatum, iban, bic, bank, telefon, gruppenrolle, vereinsrolle)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            request.form["vorname"],
-            request.form["nachname"],
-            request.form["geburtsdatum"],
-            request.form["iban"],
-            request.form["bic"],
-            request.form["bank"],
-            request.form["telefon"],
-            request.form["gruppenrolle"],
-            request.form["vereinsrolle"]
-        ))
-
-        conn.commit()
-        conn.close()
+        with get_kompass() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO gruppenleiter 
+                (vorname, nachname, geburtsdatum, iban, bic, bank, telefon, gruppenrolle, vereinsrolle)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                request.form["vorname"],
+                request.form["nachname"],
+                request.form["geburtsdatum"],
+                request.form["iban"],
+                request.form["bic"],
+                request.form["bank"],
+                request.form["telefon"],
+                request.form["gruppenrolle"],
+                request.form["vereinsrolle"]
+            ))
+            conn.commit()
 
     return redirect(url_for("admin.admin"))
 
@@ -124,36 +117,33 @@ def gruppenleiter_bearbeiten(id):
     if not check_user(4):
         return redirect(url_for("auth.login"))
 
-    conn = get_kompass()
-    cursor = conn.cursor()
+    with get_kompass() as conn:
+        cursor = conn.cursor()
 
-    if request.method == "POST":
-        cursor.execute("""
-            UPDATE gruppenleiter
-            SET vorname=?, nachname=?, geburtsdatum=?, iban=?, bic=?, bank=?,
-                telefon=?, gruppenrolle=?, vereinsrolle=?
-            WHERE id=?
-        """, (
-            request.form["vorname"],
-            request.form["nachname"],
-            request.form["geburtsdatum"],
-            request.form["iban"],
-            request.form["bic"],
-            request.form["bank"],
-            request.form["telefon"],
-            request.form["gruppenrolle"],
-            request.form["vereinsrolle"],
-            id
-        ))
+        if request.method == "POST":
+            cursor.execute("""
+                UPDATE gruppenleiter
+                SET vorname=?, nachname=?, geburtsdatum=?, iban=?, bic=?, bank=?,
+                    telefon=?, gruppenrolle=?, vereinsrolle=?
+                WHERE id=?
+            """, (
+                request.form["vorname"],
+                request.form["nachname"],
+                request.form["geburtsdatum"],
+                request.form["iban"],
+                request.form["bic"],
+                request.form["bank"],
+                request.form["telefon"],
+                request.form["gruppenrolle"],
+                request.form["vereinsrolle"],
+                id
+            ))
+            conn.commit()
+            return redirect(url_for("admin.admin"))
 
-        conn.commit()
-        conn.close()
-        return redirect(url_for("admin.admin"))
+        # GET -> Daten laden
+        leiter = cursor.execute(
+            "SELECT * FROM gruppenleiter WHERE id=?", (id,)
+        ).fetchone()
 
-    # GET -> Daten laden
-    leiter = cursor.execute(
-        "SELECT * FROM gruppenleiter WHERE id=?", (id,)
-    ).fetchone()
-
-    conn.close()
     return render_template("gruppenleiter_bearbeiten.html", leiter=leiter)
