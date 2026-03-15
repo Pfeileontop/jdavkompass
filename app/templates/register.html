@@ -7,8 +7,16 @@
     <h2>Registrieren</h2>
 
     <form method="POST" action="/register">
-        <input type="text" name="username" placeholder="Benutzername" required>
-        <input type="password" name="password" placeholder="Passwort" required>
+        <input type="text" name="username" placeholder="Benutzername" required minlength="3">
+        <input 
+            type="password" 
+            name="password" 
+            placeholder="Passwort" 
+            required 
+            minlength="8" 
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+" 
+            title="Mindestens 8 Zeichen: Großbuchstaben, Kleinbuchstaben und Zahlen"
+        >
         <button type="submit">Registrieren</button>
     </form>
 

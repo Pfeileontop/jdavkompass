@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from flask_login import LoginManager, current_user
 from app.models import get_accounts
 from app.models import User
-
+from datetime import datetime, timedelta
 
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
@@ -26,6 +26,14 @@ def create_app():
     init_db()
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+    app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    REMEMBER_COOKIE_HTTPONLY=True,
+    REMEMBER_COOKIE_SECURE=True,
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=72)
+)
 
     login_manager.init_app(app)
 
