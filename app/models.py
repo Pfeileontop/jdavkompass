@@ -2,6 +2,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash
 from flask import session
 from contextlib import contextmanager
+from flask_login import UserMixin
 
 
 def init_db():
@@ -161,7 +162,7 @@ FOREIGN KEY (erziehungsberechtigter_id) REFERENCES erziehungsberechtigte_unappro
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 uname TEXT UNIQUE NOT NULL,
 password TEXT NOT NULL,
-rolls INTEGER NOT NULL DEFAULT 1,
+role INTEGER NOT NULL DEFAULT 1,
 status TEXT NOT NULL DEFAULT 'pending'
 );
 """
@@ -184,7 +185,7 @@ status TEXT NOT NULL DEFAULT 'pending'
     existing = conn.execute(
         "SELECT id FROM accounts WHERE uname = ?", ("admin",)).fetchone()
     if not existing:
-        cursor.execute("INSERT INTO accounts (uname, password, rolls, status) VALUES (?, ?, ?, ?);",
+        cursor.execute("INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?);",
                        ("admin", generate_password_hash("admin"), "4", "active"))
     conn.commit()
     conn.close()
@@ -207,3 +208,9 @@ def get_kompass():
                 yield conn
         finally:
                 conn.close()
+
+class User(UserMixin):
+    def __init__(self, id, username, role):
+        self.id = id
+        self.username = username
+        self.role = role

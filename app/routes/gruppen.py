@@ -7,26 +7,25 @@ from flask import jsonify
 import pandas as pd
 from flask import send_file
 from io import BytesIO
-from app.routes.auth import check_user
 from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
+from flask_login import login_required, current_user
+from app.routes.auth import require_role
 gruppen_bp = Blueprint('gruppen', __name__)
 
 
 @gruppen_bp.route("/gruppen", methods=["GET", "POST"])
+@login_required
+@require_role(1)
 def gruppen():
-    if not check_user(1):
-        abort(403)
-
     gruppen = jugendgruppen_preview()
     return render_template("gruppen.html", gruppen=gruppen)
 
 
 @gruppen_bp.route('/search_mitglied', methods=['GET'])
+@login_required
+@require_role(1)
 def search_mitglied():
-    if not check_user(1):
-        abort(403)
-
     search_query = request.args.get('query', '')
 
     with get_kompass() as conn:
@@ -50,10 +49,9 @@ def search_mitglied():
     })
 
 @gruppen_bp.route('/search_gruppenleiter', methods=['GET'])
+@login_required
+@require_role(1)
 def search_gruppenleiter():
-    if not check_user(1):
-        abort(403)
-
     search_query = request.args.get('query', '')
 
     with get_kompass() as conn:
@@ -76,13 +74,14 @@ def search_gruppenleiter():
     })
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>", methods=["GET", "POST"])
+@login_required
 def gruppe(gruppe_id):
-    if not check_user(1):
+
+    if current_user.role < 1:
         abort(403)
 
-    if (not check_user(2)) and request.method == "POST":
+    if request.method == "POST" and current_user.role < 2:
         abort(403)
-
     today = datetime.datetime.today()
     today_name = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"][today.weekday()]
 
@@ -206,10 +205,9 @@ def gruppe(gruppe_id):
 
 
 @gruppen_bp.route("/gruppen/neue", methods=["POST"])
+@login_required
+@require_role(3)
 def neue_gruppe():
-    if not check_user(3):
-        abort(403)
-
     name = request.form.get("name")
     beschreibung = request.form.get("beschreibung")
     wochentag = request.form.get("wochentag")
@@ -231,10 +229,9 @@ def neue_gruppe():
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/loeschen", methods=["POST"])
+@login_required
+@require_role(3)
 def gruppe_loeschen(gruppe_id):
-    if not check_user(3):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM jugendgruppen WHERE id = ?", (gruppe_id,))
@@ -246,10 +243,9 @@ def gruppe_loeschen(gruppe_id):
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>", methods=["POST"])
+@login_required
+@require_role(3)
 def mitglied_zu_gruppe(gruppe_id, mitglied_id):
-    if not check_user(3):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
 
@@ -271,10 +267,9 @@ def mitglied_zu_gruppe(gruppe_id, mitglied_id):
 
 
 @gruppen_bp.route("/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"])
+@login_required
+@require_role(2)
 def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
-    if not check_user(2):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
 
@@ -296,10 +291,9 @@ def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"])
+@login_required
+@require_role(3)
 def mitglied_entfernen(gruppe_id, mitglied_id):
-    if not check_user(3):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -312,10 +306,9 @@ def mitglied_entfernen(gruppe_id, mitglied_id):
 
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen", methods=["POST"])
+@login_required
+@require_role(3)
 def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
-    if not check_user(3):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -327,10 +320,9 @@ def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
     return redirect(url_for('gruppen.gruppe', gruppe_id=gruppe_id))
 
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/download_attendance", methods=["GET"])
+@login_required
+@require_role(3)
 def download_attendance(gruppe_id):
-    if not check_user(3):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
 

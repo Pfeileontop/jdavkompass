@@ -1,7 +1,8 @@
 from flask import Blueprint
 from flask import request, render_template, session, redirect, url_for, abort
 from app.models import get_kompass
-from app.routes.auth import check_user
+from flask_login import login_required, current_user
+from app.routes.auth import require_role
 
 mitgliederregistrierung_bp = Blueprint('mitgliederregistrierung', __name__)
 
@@ -61,10 +62,9 @@ def anmeldung():
 
 
 @mitgliederregistrierung_bp.route("/mitglieder", methods=["GET", "POST"])
+@login_required
+@require_role(3)
 def mitglieder():
-    if not check_user(3):
-        abort(403)
-
     if request.method == "GET":
         with get_kompass() as conn:
             cursor = conn.cursor()
@@ -241,10 +241,9 @@ def mitglieder():
 
 
 @mitgliederregistrierung_bp.route("/mitglied/<int:id>/edit", methods=["GET", "POST"])
+@login_required
+@require_role(3)
 def mitglied_bearbeiten(id):
-    if not check_user(3):
-        return redirect(url_for("auth.login"))
-
     with get_kompass() as conn:
         cursor = conn.cursor()
 

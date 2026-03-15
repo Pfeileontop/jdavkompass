@@ -7,3 +7,5 @@ venv/
 .idea/
 readme.md
 logs/
+app/db/*.db
+*.log

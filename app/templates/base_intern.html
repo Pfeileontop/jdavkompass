@@ -21,10 +21,10 @@
             <ul id="nav-links" class="container">
                 <li><a href="/">Dashboard</a></li>
                 <li><a href="/gruppen">Gruppen</a></li>
-                {% if check_user(3) %}
+                {% if current_user.role >= 3 %}
                 <li><a href="/mitglieder">Mitglieder</a></li>
                 {% endif %}
-                {% if check_user(4) %}
+                {% if current_user.role >= 4 %}
                 <li><a href="/admin">Admin</a></li>
                 {% endif %}
                 <li><a href="/profile">Profil</a></li>

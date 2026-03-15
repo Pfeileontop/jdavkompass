@@ -1,7 +1,8 @@
 from flask import Blueprint
 from flask import session, redirect, url_for, request, render_template, abort
 from app.models import get_accounts, get_kompass
-from app.routes.auth import check_user
+from flask_login import login_required, current_user
+from app.routes.auth import require_role
 
 import os
 import json
@@ -10,10 +11,9 @@ from math import ceil
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route("/admin", methods=["GET", "POST"])
+@login_required
+@require_role(4)
 def admin():
-    if not check_user(4):
-        abort(403)
-
     # -------------------------
     # Handle account actions
     # -------------------------
@@ -27,26 +27,26 @@ def admin():
 
             if action == "approve":
                 cursor.execute(
-                    "UPDATE accounts SET status='active' WHERE id=? AND rolls!='4'",
+                    "UPDATE accounts SET status='active' WHERE id=? AND role!='4'",
                     (account_id,),
                 )
 
             elif action == "delete":
                 cursor.execute(
-                    "DELETE FROM accounts WHERE id=? AND rolls!='4'",
+                    "DELETE FROM accounts WHERE id=? AND role!='4'",
                     (account_id,),
                 )
 
             elif action == "change_role" and new_role in {"1", "2", "3", "4"}:
                 cursor.execute(
-                    "UPDATE accounts SET rolls=? WHERE id=? AND rolls!='4'",
+                    "UPDATE accounts SET role=? WHERE id=? AND role!='4'",
                     (new_role, account_id),
                 )
 
             conn.commit()
 
         accounts = cursor.execute(
-            "SELECT id, uname, status, rolls FROM accounts ORDER BY id"
+            "SELECT id, uname, status, role FROM accounts ORDER BY id"
         ).fetchall()
 
     # -------------------------
@@ -84,10 +84,9 @@ def admin():
     )
 
 @admin_bp.route("/gruppenleiter/add", methods=["GET", "POST"])
+@login_required
+@require_role(4)
 def add_gruppenleiter():
-    if not check_user(4):
-        abort(403)
-
     if request.method == "POST":
         with get_kompass() as conn:
             cursor = conn.cursor()
@@ -113,10 +112,9 @@ def add_gruppenleiter():
 
 
 @admin_bp.route("/gruppenleiter/<int:id>/edit", methods=["GET", "POST"])
+@login_required
+@require_role(4)
 def gruppenleiter_bearbeiten(id):
-    if not check_user(4):
-        abort(403)
-
     with get_kompass() as conn:
         cursor = conn.cursor()
 

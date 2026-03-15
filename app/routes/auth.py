@@ -3,6 +3,11 @@ from flask import request, render_template, session, redirect, url_for, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import get_accounts
 import sqlite3
+from flask_login import login_user, logout_user
+from app.models import User
+from functools import wraps
+from flask_login import current_user
+from flask import abort
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -16,7 +21,7 @@ def login():
         password = request.form["password"]
 
         with get_accounts() as conn:
-            row = conn.execute("SELECT id, password, rolls, status FROM accounts WHERE uname = ?", (username,)).fetchone()
+            row = conn.execute("SELECT id, password, role, status FROM accounts WHERE uname = ?", (username,)).fetchone()
         
         error = None
 
@@ -25,7 +30,10 @@ def login():
                 error = "Dein Konto wartet noch auf eine Adminbestätigung"
             elif check_password_hash(row["password"], password):
                 session.clear()
-                session["user_id"] = row["id"]
+                
+                user = User(row["id"], username, row["role"])
+                login_user(user)
+
                 return redirect("/")
             else:
                 error = "Falsche Kombination aus Benutzernamen und Passwort."
@@ -56,28 +64,24 @@ def register():
                 session.clear()
                 return render_template("register.html", error="Benutzername existiert bereits.")
 
-            conn.execute("INSERT INTO accounts (uname, password, rolls, status) VALUES (?, ?, ?, ?)",(username, hashed_password, 1, "pending"))
+            conn.execute("INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?)",(username, hashed_password, 1, "pending"))
             conn.commit()
         return redirect("/")
 
 
 @auth_bp.route("/logout", methods=["GET", "POST"])
 def logout():
-    session.clear()
+    logout_user()
     return redirect(url_for("auth.login"))
 
-
-def check_user(level: int) -> bool:
-    user_id = session.get("user_id")
-    if not user_id:
-        return False
-
-    with get_accounts() as conn:
-        row = conn.execute("SELECT rolls FROM accounts WHERE id=?", (user_id,)).fetchone()
-
-    if not row:
-        return False
-
-    role = int(row["rolls"])
-
-    return role >= level
+def require_role(level):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            if not current_user.is_authenticated:
+                abort(401)
+            if current_user.role < level:
+                abort(403)
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator

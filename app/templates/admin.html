@@ -24,7 +24,7 @@
                     <td>{{ acc.uname }}</td>
                     <td>{{ acc.status }}</td>
                     <td>
-                        {% if acc.rolls != 4 %}
+                        {% if acc.role != 4 %}
                         <form method="POST" class="inline-form">
                             <input type="hidden" name="account_id" value="{{ acc.id }}">
 
@@ -35,7 +35,7 @@
                             {% else %}
                             <select name="new_role" class="minimal-select">
                                 {% for role, label in {"1": "View-only", "2": "Julei", "3": "Gruppenplaner", "4": "Admin"}.items() %}
-                                <option value="{{ role }}" {% if acc.rolls|string == role %}selected{% endif %}>
+                                <option value="{{ role }}" {% if acc.role|string == role %}selected{% endif %}>
                                     {{ label }}
                                 </option>
                                 {% endfor %}

@@ -16,11 +16,11 @@
                         {% for datum in alle_daten %}
                         <th class="historie">{{ datum[8:10] }}.{{ datum[5:7] }}.{{ datum[0:4] }}</th>
                         {% endfor %}
-                        {% if today_name == gruppe['wochentag'] %}
+                        {% if today_name == gruppe['wochentag'] and current_user.role >= 3%}
                         <th>Heute?</th>
                         {% endif %}
                         <th>Notfallkontakt</th>
-                        {% if check_user(3) %}
+                        {% if current_user.role >= 3 %}
                         <th>Aktion</th>
                         {% endif %}
                     </tr>
@@ -39,7 +39,7 @@
                         </td>
                         {% endfor %}
 
-                        {% if today_name == gruppe['wochentag'] and check_user(2) %}
+                        {% if today_name == gruppe['wochentag'] and current_user.role >= 3 %}
                         <td>
                             <input type="checkbox"
                                    name="mitglied_{{ mitglied[0] }}"
@@ -55,7 +55,7 @@
                             {% endif %}
                         </td>
 
-                        {% if check_user(3) %}
+                        {% if current_user.role >= 3 %}
                         <td>
                             <button class="btn-remove" type="submit"
                                     form="remove-member-{{ mitglied[0] }}">
@@ -79,7 +79,7 @@
                         </td>
                         {% endfor %}
 
-                        {% if today_name == gruppe['wochentag'] %}
+                        {% if today_name == gruppe['wochentag'] and current_user.role >= 3 %}
                         <td>
                             <input type="checkbox"
                                    name="gruppenleiter_{{ gruppenleiter[0] }}"
@@ -89,7 +89,7 @@
 
                         <td></td>
 
-                        {% if check_user(3) %}
+                        {% if current_user.role >= 3 %}
                         <td>
                             <button class="btn-remove" type="submit"
                                     form="remove-leader-{{ gruppenleiter[0] }}">
@@ -103,7 +103,7 @@
             </table>
         </form>
 
-        {% if check_user(3) %}
+        {% if current_user.role >= 3 %}
         <form id="download-form"
               action="{{ url_for('gruppen.download_attendance', gruppe_id=gruppe[0]) }}"
               method="GET">
@@ -117,7 +117,7 @@
             </button>
             {% endif %}
 
-            {% if check_user(3) %}
+            {% if current_user.role >= 3 %}
             <button type="submit" class="btn-submit" form="download-form">
                 Download Anwesenheitsliste
             </button>
@@ -140,7 +140,7 @@
     </div>
 
     <div class="gruppe-actions">
-        {% if check_user(3) %}
+        {% if current_user.role >= 3 %}
         <div class="action-item">
             <h3>Mitglied hinzufügen</h3>
             <input type="text" id="search_mitglied" placeholder="Mitglied suchen..."
@@ -149,7 +149,7 @@
         </div>
         {% endif %}
 
-        {% if check_user(2) %}
+        {% if current_user.role >= 2 %}
         <div class="action-item">
             <h3>Gruppenleiter hinzufügen</h3>
             <input type="text" id="search_gruppenleiter" placeholder="Gruppenleiter suchen..."
@@ -158,7 +158,7 @@
         </div>
         {% endif %}
 
-        {% if check_user(3) %}
+        {% if current_user.role >= 3 %}
         <form action="{{ url_for('gruppen.gruppe_loeschen', gruppe_id=gruppe[0]) }}"
               method="POST"
               onsubmit="return confirm('Gruppe wirklich löschen?');">

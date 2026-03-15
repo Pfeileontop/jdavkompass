@@ -81,7 +81,7 @@
         </div>
     </div>
 
-    {% if check_user(3) %}
+    {% if current_user.role >= 3 %}
     <button id="neue-gruppe-btn" class="btn-submit">
         Neue Gruppe erstellen
     </button>
