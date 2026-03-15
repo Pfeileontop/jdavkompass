@@ -1,12 +1,8 @@
 from flask import Blueprint
-from flask import session, redirect, url_for, request, render_template, abort
+from flask import redirect, url_for, request, render_template
 from app.models import get_accounts, get_kompass
-from flask_login import login_required, current_user
+from flask_login import login_required
 from app.routes.auth import require_role
-
-import os
-import json
-from math import ceil
 
 admin_bp = Blueprint('admin', __name__)
 

@@ -1,7 +1,7 @@
 from flask import Blueprint
-from flask import request, render_template, session, redirect, url_for, abort
+from flask import request, render_template, redirect, url_for
 from app.models import get_kompass
-from flask_login import login_required, current_user
+from flask_login import login_required
 from app.routes.auth import require_role
 
 mitgliederregistrierung_bp = Blueprint('mitgliederregistrierung', __name__)

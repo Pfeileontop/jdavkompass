@@ -1,7 +1,6 @@
 from flask import Blueprint
-from flask import render_template, session, redirect, url_for, abort
+from flask import render_template
 import datetime
-from app.models import get_accounts
 from app.utils import jugendgruppen_preview
 from flask_login import login_required, current_user
 from app.routes.auth import require_role

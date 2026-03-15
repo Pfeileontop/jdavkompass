@@ -4,7 +4,7 @@ import json
 import time
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
-from flask import Flask, request, session
+from flask import Flask, request, render_template
 from app.models import init_db
 from .routes.auth import auth_bp
 from .routes.admin import admin_bp
@@ -13,7 +13,7 @@ from .routes.mitgliederregistrierung import mitgliederregistrierung_bp
 from .routes.profile import profile_bp
 from .routes.index import index_bp
 from dotenv import load_dotenv
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from app.models import get_accounts
 from app.models import User
 
@@ -39,23 +39,15 @@ def create_app():
                 "level": record.levelname,
                 "message": record.getMessage(),
             }
-
             if hasattr(record, "extra_data"):
                 log_record.update(record.extra_data)
-
             if record.exc_info:
                 log_record["exception"] = self.formatException(record.exc_info)
-
             return json.dumps(log_record)
 
-    file_handler = RotatingFileHandler(
-        "logs/app.log",
-        maxBytes=5 * 1024 * 1024,
-        backupCount=5
-    )
+    file_handler = RotatingFileHandler("logs/app.log", maxBytes=5*1024*1024, backupCount=5)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(JSONFormatter())
-
     app.logger.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
 
@@ -69,38 +61,70 @@ def create_app():
             return response
 
         duration = round((time.time() - request.start_time) * 1000, 2)
+        user_info = {
+            "user_id": getattr(current_user, "id", None),
+            "username": getattr(current_user, "username", None),
+            "role": getattr(current_user, "role", None)
+        }
 
-        app.logger.info(
-            "HTTP Request",
-            extra={
-                "extra_data": {
-                    "method": request.method,
-                    "path": request.path,
-                    "status": response.status_code,
-                    "ip": request.remote_addr,
-                    "user_id": session.get("user_id"),
-                    "duration_ms": duration
-                }
-            }
-        )
+        log_data = {
+            "method": request.method,
+            "path": request.path,
+            "status": response.status_code,
+            "ip": request.remote_addr,
+            "duration_ms": duration,
+            "user": user_info
+        }
+
+        # Log 4xx as warnings, 5xx+ as errors
+        if 400 <= response.status_code < 500:
+            app.logger.warning("Client error", extra={"extra_data": log_data})
+        elif response.status_code >= 500:
+            app.logger.error("Server error", extra={"extra_data": log_data})
+        else:
+            app.logger.info("HTTP Request", extra={"extra_data": log_data})
 
         return response
 
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        app.logger.error(
-            "Unhandled Exception",
-            exc_info=True,
-            extra={
-                "extra_data": {
-                    "method": request.method,
-                    "path": request.path,
-                    "ip": request.remote_addr,
-                    "user_id": session.get("user_id")
-                }
-            }
+    @app.errorhandler(403)
+    def forbidden(e):
+        user_info = {
+            "user_id": getattr(current_user, "id", None),
+            "username": getattr(current_user, "username", None),
+            "role": getattr(current_user, "role", None)
+        }
+        app.logger.warning(
+            "Forbidden access",
+            extra={"extra_data": {"method": request.method, "path": request.path, "ip": request.remote_addr, "user": user_info}}
         )
-        return e
+        return render_template("errors/403.html"), 403
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        user_info = {
+            "user_id": getattr(current_user, "id", None),
+            "username": getattr(current_user, "username", None),
+            "role": getattr(current_user, "role", None)
+        }
+        app.logger.warning(
+            "Page not found",
+            extra={"extra_data": {"method": request.method, "path": request.path, "ip": request.remote_addr, "user": user_info}}
+        )
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        user_info = {
+            "user_id": getattr(current_user, "id", None),
+            "username": getattr(current_user, "username", None),
+            "role": getattr(current_user, "role", None)
+        }
+        app.logger.error(
+            "Server error",
+            exc_info=True,
+            extra={"extra_data": {"method": request.method, "path": request.path, "ip": request.remote_addr, "user": user_info}}
+        )
+        return render_template("errors/500.html"), 500
     
     @login_manager.user_loader
     def load_user(user_id):

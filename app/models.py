@@ -1,6 +1,5 @@
 import sqlite3
 from werkzeug.security import generate_password_hash
-from flask import session
 from contextlib import contextmanager
 from flask_login import UserMixin
 

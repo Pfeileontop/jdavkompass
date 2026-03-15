@@ -5,7 +5,7 @@ venv/
 .env/
 .vscode/
 .idea/
-readme.md
 logs/
 app/db/*.db
 *.log
+.pylintrc

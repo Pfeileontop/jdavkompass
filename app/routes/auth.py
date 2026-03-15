@@ -2,12 +2,10 @@ from flask import Blueprint
 from flask import request, render_template, session, redirect, url_for, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import get_accounts
-import sqlite3
 from flask_login import login_user, logout_user
 from app.models import User
 from functools import wraps
 from flask_login import current_user
-from flask import abort
 
 auth_bp = Blueprint('auth', __name__)
 

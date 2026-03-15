@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask import session, redirect, render_template, abort, request, url_for, abort
+from flask import redirect, render_template, abort, request, url_for
 import datetime
 from app.models import get_kompass
 from app.utils import jugendgruppen_preview
@@ -11,8 +11,8 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.utils import get_column_letter
 from flask_login import login_required, current_user
 from app.routes.auth import require_role
-gruppen_bp = Blueprint('gruppen', __name__)
 
+gruppen_bp = Blueprint('gruppen', __name__)
 
 @gruppen_bp.route("/gruppen", methods=["GET", "POST"])
 @login_required
