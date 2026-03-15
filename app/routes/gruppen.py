@@ -30,14 +30,7 @@ def search_mitglied():
 
     with get_kompass() as conn:
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT id, vorname, nachname
-            FROM mitglieder
-            WHERE vorname LIKE ? OR nachname LIKE ?
-            """,
-            ('%' + search_query + '%', '%' + search_query + '%')
-        )
+        cursor.execute("""SELECT id, vorname, nachname FROM mitglieder WHERE vorname LIKE ? OR nachname LIKE ?""", ('%' + search_query + '%', '%' + search_query + '%'))
         search_results_mitglieder = cursor.fetchall()
 
     # Rückgabe als JSON
@@ -56,14 +49,7 @@ def search_gruppenleiter():
 
     with get_kompass() as conn:
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT id, vorname, nachname
-            FROM gruppenleiter
-            WHERE vorname LIKE ? OR nachname LIKE ?
-            """,
-            ('%' + search_query + '%', '%' + search_query + '%')
-        )
+        cursor.execute("""SELECT id, vorname, nachname FROM gruppenleiter WHERE vorname LIKE ? OR nachname LIKE ?""", ('%' + search_query + '%', '%' + search_query + '%'))
         search_results_gruppenleiter = cursor.fetchall()
 
     return jsonify({
@@ -97,22 +83,13 @@ def gruppe(gruppe_id):
         cursor = conn.cursor()
 
         # Existiert die aufgerufene Gruppe?
-        cursor.execute("""
-            SELECT id, name, wochentag, startzeit, endzeit
-            FROM jugendgruppen
-            WHERE id = ?
-        """, (gruppe_id,))
+        cursor.execute("""SELECT id, name, wochentag, startzeit, endzeit FROM jugendgruppen WHERE id = ?""", (gruppe_id,))
         gruppe = cursor.fetchone()
         if not gruppe:
             abort(404)
 
         # Gruppenleiter
-        cursor.execute("""
-            SELECT g.id, g.vorname, g.nachname
-            FROM gruppenleiter g
-            JOIN gruppenleiter_jugendgruppen gj ON g.id = gj.gruppenleiter_id
-            WHERE gj.jugendgruppe_id = ?
-        """, (gruppe_id,))
+        cursor.execute("""SELECT g.id, g.vorname, g.nachname FROM gruppenleiter g JOIN gruppenleiter_jugendgruppen gj ON g.id = gj.gruppenleiter_id WHERE gj.jugendgruppe_id = ?""", (gruppe_id,))
         gruppenleiter = cursor.fetchall()
 
         # Mitglieder

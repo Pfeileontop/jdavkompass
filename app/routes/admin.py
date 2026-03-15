@@ -10,9 +10,6 @@ admin_bp = Blueprint('admin', __name__)
 @login_required
 @require_role(4)
 def admin():
-    # -------------------------
-    # Handle account actions
-    # -------------------------
     with get_accounts() as conn:
         cursor = conn.cursor()
 
@@ -22,37 +19,22 @@ def admin():
             new_role = request.form.get("new_role")
 
             if action == "approve":
-                cursor.execute(
-                    "UPDATE accounts SET status='active' WHERE id=? AND role!='4'",
-                    (account_id,),
-                )
+                cursor.execute("UPDATE accounts SET status='active' WHERE id=? AND role!='4'", (account_id,),)
 
             elif action == "delete":
-                cursor.execute(
-                    "DELETE FROM accounts WHERE id=? AND role!='4'",
-                    (account_id,),
-                )
+                cursor.execute("DELETE FROM accounts WHERE id=? AND role!='4'", (account_id,),)
 
             elif action == "change_role" and new_role in {"1", "2", "3", "4"}:
-                cursor.execute(
-                    "UPDATE accounts SET role=? WHERE id=? AND role!='4'",
-                    (new_role, account_id),
-                )
+                cursor.execute("UPDATE accounts SET role=? WHERE id=? AND role!='4'", (new_role, account_id),)
 
             conn.commit()
 
-        accounts = cursor.execute(
-            "SELECT id, uname, status, role FROM accounts ORDER BY id"
-        ).fetchall()
+        accounts = cursor.execute("SELECT id, uname, status, role FROM accounts ORDER BY id").fetchall()
 
-    # -------------------------
-    # Load gruppenleiter data
-    # -------------------------
     with get_kompass() as conn:
         cursor = conn.cursor()
 
-        gruppenleiter = cursor.execute("""
-            SELECT
+        gruppenleiter = cursor.execute("""SELECT
                 gl.id,
                 gl.vorname,
                 gl.nachname,
@@ -136,8 +118,6 @@ def gruppenleiter_bearbeiten(id):
             return redirect(url_for("admin.admin"))
 
         # GET -> Daten laden
-        leiter = cursor.execute(
-            "SELECT * FROM gruppenleiter WHERE id=?", (id,)
-        ).fetchone()
+        leiter = cursor.execute("SELECT * FROM gruppenleiter WHERE id=?", (id,)).fetchone()
 
     return render_template("gruppenleiter_bearbeiten.html", leiter=leiter)
