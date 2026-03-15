@@ -63,7 +63,7 @@ def anmeldung():
 @mitgliederregistrierung_bp.route("/mitglieder", methods=["GET", "POST"])
 def mitglieder():
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     if request.method == "GET":
         with get_kompass() as conn:

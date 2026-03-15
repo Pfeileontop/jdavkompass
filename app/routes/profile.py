@@ -10,7 +10,7 @@ profile_bp = Blueprint('profile', __name__)
 @profile_bp.route("/profile", methods=["GET", "POST"])
 def profile():
     if not check_user(1):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     error = None
     success = None

@@ -11,7 +11,7 @@ index_bp = Blueprint('index', __name__)
 @index_bp.route("/")
 def index():
     if not check_user(1):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_accounts() as conn:
         user = conn.execute("SELECT id, uname FROM accounts WHERE id = ?", (session["user_id"],)).fetchone()

@@ -12,7 +12,7 @@ admin_bp = Blueprint('admin', __name__)
 @admin_bp.route("/admin", methods=["GET", "POST"])
 def admin():
     if not check_user(4):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     # -------------------------
     # Handle account actions
@@ -86,7 +86,7 @@ def admin():
 @admin_bp.route("/gruppenleiter/add", methods=["GET", "POST"])
 def add_gruppenleiter():
     if not check_user(4):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     if request.method == "POST":
         with get_kompass() as conn:
@@ -115,7 +115,7 @@ def add_gruppenleiter():
 @admin_bp.route("/gruppenleiter/<int:id>/edit", methods=["GET", "POST"])
 def gruppenleiter_bearbeiten(id):
     if not check_user(4):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()

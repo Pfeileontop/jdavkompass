@@ -21,7 +21,7 @@ def login():
         error = None
 
         if row:
-            if row["status"] == "pending":
+            if row["status"] != "active":
                 error = "Dein Konto wartet noch auf eine Adminbestätigung"
             elif check_password_hash(row["password"], password):
                 session.clear()
@@ -78,6 +78,6 @@ def check_user(level: int) -> bool:
     if not row:
         return False
 
-    role = row["rolls"]
+    role = int(row["rolls"])
 
     return role >= level

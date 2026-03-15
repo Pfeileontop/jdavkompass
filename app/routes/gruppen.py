@@ -16,7 +16,7 @@ gruppen_bp = Blueprint('gruppen', __name__)
 @gruppen_bp.route("/gruppen", methods=["GET", "POST"])
 def gruppen():
     if not check_user(1):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     gruppen = jugendgruppen_preview()
     return render_template("gruppen.html", gruppen=gruppen)
@@ -25,7 +25,7 @@ def gruppen():
 @gruppen_bp.route('/search_mitglied', methods=['GET'])
 def search_mitglied():
     if not check_user(1):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     search_query = request.args.get('query', '')
 
@@ -52,7 +52,7 @@ def search_mitglied():
 @gruppen_bp.route('/search_gruppenleiter', methods=['GET'])
 def search_gruppenleiter():
     if not check_user(1):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     search_query = request.args.get('query', '')
 
@@ -78,10 +78,10 @@ def search_gruppenleiter():
 @gruppen_bp.route("/gruppen/<int:gruppe_id>", methods=["GET", "POST"])
 def gruppe(gruppe_id):
     if not check_user(1):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     if (not check_user(2)) and request.method == "POST":
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     today = datetime.datetime.today()
     today_name = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"][today.weekday()]
@@ -208,7 +208,7 @@ def gruppe(gruppe_id):
 @gruppen_bp.route("/gruppen/neue", methods=["POST"])
 def neue_gruppe():
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     name = request.form.get("name")
     beschreibung = request.form.get("beschreibung")
@@ -233,7 +233,7 @@ def neue_gruppe():
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/loeschen", methods=["POST"])
 def gruppe_loeschen(gruppe_id):
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()
@@ -248,7 +248,7 @@ def gruppe_loeschen(gruppe_id):
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>", methods=["POST"])
 def mitglied_zu_gruppe(gruppe_id, mitglied_id):
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()
@@ -273,7 +273,7 @@ def mitglied_zu_gruppe(gruppe_id, mitglied_id):
 @gruppen_bp.route("/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"])
 def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
     if not check_user(2):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()
@@ -298,7 +298,7 @@ def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"])
 def mitglied_entfernen(gruppe_id, mitglied_id):
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()
@@ -314,7 +314,7 @@ def mitglied_entfernen(gruppe_id, mitglied_id):
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen", methods=["POST"])
 def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()
@@ -329,7 +329,7 @@ def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
 @gruppen_bp.route("/gruppen/<int:gruppe_id>/download_attendance", methods=["GET"])
 def download_attendance(gruppe_id):
     if not check_user(3):
-        return redirect(url_for("auth.login"))
+        abort(403)
 
     with get_kompass() as conn:
         cursor = conn.cursor()
