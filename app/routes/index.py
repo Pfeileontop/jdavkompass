@@ -13,10 +13,8 @@ def index():
     if not check_user(1):
         return redirect(url_for("auth.login"))
 
-    conn = get_accounts()
-    cur = conn.cursor()
-    user = cur.execute("SELECT id, uname FROM accounts WHERE id = ?", (session["user_id"],)).fetchone()
-    conn.close()
+    with get_accounts() as conn:
+        user = conn.execute("SELECT id, uname FROM accounts WHERE id = ?", (session["user_id"],)).fetchone()
 
     today = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag","Samstag", "Sonntag"][datetime.datetime.today().weekday()]
 

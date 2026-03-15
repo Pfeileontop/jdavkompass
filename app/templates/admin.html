@@ -24,23 +24,19 @@
                     <td>{{ acc.uname }}</td>
                     <td>{{ acc.status }}</td>
                     <td>
-                        {% if acc.rolls != "4" %}
+                        {% if acc.rolls != 4 %}
                         <form method="POST" class="inline-form">
                             <input type="hidden" name="account_id" value="{{ acc.id }}">
 
-                            {% if acc.status == "requesting access" %}
+                            {% if acc.status == "pending" %}
                             <button type="submit" name="action" value="approve" class="btn-submit">
                                 Approve
                             </button>
                             {% else %}
                             <select name="new_role" class="minimal-select">
-                                {% for role in ["1", "2", "3", "4"] %}
-                                <option value="{{ role }}" {% if acc.rolls == role %}selected{% endif %}>
-                                    {% if role == "1" %}View-only
-                                    {% elif role == "2" %}Julei
-                                    {% elif role == "3" %}Gruppenplaner
-                                    {% elif role == "4" %}Admin
-                                    {% endif %}
+                                {% for role, label in {"1": "View-only", "2": "Julei", "3": "Gruppenplaner", "4": "Admin"}.items() %}
+                                <option value="{{ role }}" {% if acc.rolls|string == role %}selected{% endif %}>
+                                    {{ label }}
                                 </option>
                                 {% endfor %}
                             </select>

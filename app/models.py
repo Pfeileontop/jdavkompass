@@ -2,6 +2,7 @@ import sqlite3
 from flask import g
 from werkzeug.security import generate_password_hash
 from flask import session
+from contextlib import contextmanager
 
 
 def init_db():
@@ -159,10 +160,10 @@ FOREIGN KEY (erziehungsberechtigter_id) REFERENCES erziehungsberechtigte_unappro
     statements_accounts = [
         """CREATE TABLE IF NOT EXISTS accounts (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
-uname TEXT NOT NULL,
+uname TEXT UNIQUE NOT NULL,
 password TEXT NOT NULL,
-rolls TEXT NOT NULL,
-status TEXT NOT NULL DEFAULT 'requesting access'
+rolls INTEGER NOT NULL DEFAULT 1,
+status TEXT NOT NULL DEFAULT 'pending'
 );
 """
     ]
@@ -190,11 +191,14 @@ status TEXT NOT NULL DEFAULT 'requesting access'
     conn.close()
 
 
+@contextmanager
 def get_accounts():
-    if 'accounts_db' not in g:
-        g.accounts_db = sqlite3.connect("app/db/accounts.db")
-        g.accounts_db.row_factory = sqlite3.Row
-    return g.accounts_db
+    conn = sqlite3.connect("app/db/accounts.db")
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 
 def get_kompass():

@@ -6,14 +6,13 @@
 <section class="page-section">
     <h1>Willkommen, {{ user[1] }}</h1>
     <h3>
-        Heute ist {{ today }}
-        {% if heutige_gruppen %}, es finden folgende Jugendgruppen statt{% endif %}
+        Heute ist {{ today }}{% if heutige_gruppen %}, es finden folgende Jugendgruppen statt{% endif %}
     </h3>
 
     <div class="cards">
         {% if heutige_gruppen %}
             {% for gruppe in heutige_gruppen %}
-            <a class="card" href="{{ url_for('gruppen.gruppe_detail', gruppe_id=gruppe.id) }}">
+            <a class="card" href="{{ url_for('gruppen.gruppe', gruppe_id=gruppe.id) }}">
                 <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
                 <div class="gruppe-info">
                     <div class="info-item">

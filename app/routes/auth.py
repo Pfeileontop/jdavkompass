@@ -12,16 +12,16 @@ def login():
         return render_template("login.html")
 
     elif request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip().lower()
         password = request.form["password"]
 
-        conn = get_accounts()
-        row = conn.execute("SELECT id, password, rolls, status FROM accounts WHERE uname = ?", (username,)).fetchone()
-        conn.close()
+        with get_accounts() as conn:
+            row = conn.execute("SELECT id, password, rolls, status FROM accounts WHERE uname = ?", (username,)).fetchone()
+        
         error = None
 
         if row:
-            if row["status"] != "active":
+            if row["status"] == "pending":
                 error = "Dein Konto wartet noch auf eine Adminbestätigung"
             elif check_password_hash(row["password"], password):
                 session.clear()
@@ -41,7 +41,7 @@ def register():
         return render_template("register.html")
 
     elif request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip().lower()
         password = request.form["password"]
         hashed_password = generate_password_hash(password)
 
@@ -49,17 +49,15 @@ def register():
             session.clear()
             return render_template("register.html", error="Bitte Benutzername und Passwort eingeben.")
 
-        conn = get_accounts()
-        existing = conn.execute("SELECT id FROM accounts WHERE uname = ?", (username,)).fetchone()
+        with get_accounts() as conn:
+            existing = conn.execute("SELECT id FROM accounts WHERE uname = ?", (username,)).fetchone()
 
-        if existing:
-            session.clear()
-            return render_template("register.html", error="Benutzername existiert bereits.")
+            if existing:
+                session.clear()
+                return render_template("register.html", error="Benutzername existiert bereits.")
 
-        conn.execute("INSERT INTO accounts (uname, password, rolls) VALUES (?, ?, ?)", (username, hashed_password, "requesting access"))
-        conn.commit()
-
-        conn.close()
+            conn.execute("INSERT INTO accounts (uname, password, rolls, status) VALUES (?, ?, ?, ?)",(username, hashed_password, 1, "pending"))
+            conn.commit()
         return redirect("/")
 
 
@@ -69,27 +67,17 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
-def check_user(level):
-    if "user_id" not in session:
-        session.clear()
+def check_user(level: int) -> bool:
+    user_id = session.get("user_id")
+    if not user_id:
         return False
 
-    role_levels = {
-        1: "view_only",  # Level 1: View only
-        2: "attendance_modify",  # Level 2: Modify attendance, add leaders
-        3: "member_manage",  # Level 3: Manage members, delete groups, create new groups
-        4: "admin"  # Admin: Full access
-    }
+    with get_accounts() as conn:
+        row = conn.execute("SELECT rolls FROM accounts WHERE id=?", (user_id,)).fetchone()
 
-    con = sqlite3.connect("app/db/accounts.db")
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
+    if not row:
+        return False
 
-    id = session.get("user_id")
-    cur.execute("SELECT rolls FROM accounts WHERE id = ?", (id,))
-    role = int(cur.fetchone()["rolls"])
+    role = row["rolls"]
 
-    if role in role_levels and role >= level:
-        return True
-
-    return False
+    return role >= level

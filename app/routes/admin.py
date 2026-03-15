@@ -17,39 +17,37 @@ def admin():
     # -------------------------
     # Handle account actions
     # -------------------------
-    conn = get_accounts()
-    cursor = conn.cursor()
+    with get_accounts() as conn:
+        cursor = conn.cursor()
 
-    if request.method == "POST":
-        account_id = request.form.get("account_id")
-        action = request.form.get("action")
-        new_role = request.form.get("new_role")
+        if request.method == "POST":
+            account_id = request.form.get("account_id")
+            action = request.form.get("action")
+            new_role = request.form.get("new_role")
 
-        if action == "approve":
-            cursor.execute(
-                "UPDATE accounts SET status='active' WHERE id=? AND rolls!='4'",
-                (account_id,),
-            )
+            if action == "approve":
+                cursor.execute(
+                    "UPDATE accounts SET status='active' WHERE id=? AND rolls!='4'",
+                    (account_id,),
+                )
 
-        elif action == "delete":
-            cursor.execute(
-                "DELETE FROM accounts WHERE id=? AND rolls!='4'",
-                (account_id,),
-            )
+            elif action == "delete":
+                cursor.execute(
+                    "DELETE FROM accounts WHERE id=? AND rolls!='4'",
+                    (account_id,),
+                )
 
-        elif action == "change_role" and new_role in {"1", "2", "3", "4"}:
-            cursor.execute(
-                "UPDATE accounts SET rolls=? WHERE id=? AND rolls!='4'",
-                (new_role, account_id),
-            )
+            elif action == "change_role" and new_role in {"1", "2", "3", "4"}:
+                cursor.execute(
+                    "UPDATE accounts SET rolls=? WHERE id=? AND rolls!='4'",
+                    (new_role, account_id),
+                )
 
-        conn.commit()
+            conn.commit()
 
-    accounts = cursor.execute(
-        "SELECT id, uname, status, rolls FROM accounts ORDER BY id"
-    ).fetchall()
-
-    conn.close()
+        accounts = cursor.execute(
+            "SELECT id, uname, status, rolls FROM accounts ORDER BY id"
+        ).fetchall()
 
     # -------------------------
     # Load gruppenleiter data
