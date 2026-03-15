@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask import request, render_template, session, redirect, url_for
+from flask import request, render_template, session, redirect, url_for, abort
 from app.models import get_kompass
 from app.routes.auth import check_user
 

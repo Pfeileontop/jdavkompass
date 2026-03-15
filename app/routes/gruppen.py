@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask import session, redirect, render_template, abort, request, url_for
+from flask import session, redirect, render_template, abort, request, url_for, abort
 import datetime
 from app.models import get_kompass
 from app.utils import jugendgruppen_preview

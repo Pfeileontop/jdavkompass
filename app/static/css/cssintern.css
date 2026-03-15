@@ -366,6 +366,10 @@ button {
     gap: 0.5rem;
 }
 
+.inline-form button {
+    margin: 0;
+}
+
 .minimal-select {
     padding: 0.38rem 0.5rem;
     border-radius: 6px;

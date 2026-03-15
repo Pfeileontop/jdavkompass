@@ -4,9 +4,7 @@ import json
 import time
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
-
 from flask import Flask, request, session
-
 from app.models import init_db
 from .routes.auth import auth_bp, check_user
 from .routes.admin import admin_bp
@@ -15,10 +13,13 @@ from .routes.mitgliederregistrierung import mitgliederregistrierung_bp
 from .routes.profile import profile_bp
 from .routes.index import index_bp
 
+from dotenv import load_dotenv
+load_dotenv()
+
 def create_app():
     init_db()
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 
     if not os.path.exists("logs"):
         os.mkdir("logs")
