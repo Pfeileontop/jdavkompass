@@ -1,7 +1,8 @@
 import sqlite3
-from werkzeug.security import generate_password_hash
 from contextlib import contextmanager
+
 from flask_login import UserMixin
+from werkzeug.security import generate_password_hash
 
 
 def init_db():
@@ -117,7 +118,7 @@ FOREIGN KEY (gruppenleiter_id) REFERENCES gruppenleiter(id),
 FOREIGN KEY (gruppe_id) REFERENCES jugendgruppen(id)
 );
 """,
-"""CREATE TABLE IF NOT EXISTS mitglieder_unapproved (
+        """CREATE TABLE IF NOT EXISTS mitglieder_unapproved (
 id INTEGER PRIMARY KEY,
 vorname TEXT not NULL,
 nachname TEXT not NULL,
@@ -156,16 +157,14 @@ FOREIGN KEY (erziehungsberechtigter_id) REFERENCES erziehungsberechtigte_unappro
 );
 """,
     ]
-    statements_accounts = [
-        """CREATE TABLE IF NOT EXISTS accounts (
+    statements_accounts = ["""CREATE TABLE IF NOT EXISTS accounts (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 uname TEXT UNIQUE NOT NULL,
 password TEXT NOT NULL,
 role INTEGER NOT NULL DEFAULT 1,
 status TEXT NOT NULL DEFAULT 'pending'
 );
-"""
-    ]
+"""]
 
     conn = sqlite3.connect("app/db/kompass.db")
     cursor = conn.cursor()
@@ -182,10 +181,13 @@ status TEXT NOT NULL DEFAULT 'pending'
         cursor.execute(statement)
     conn.commit()
     existing = conn.execute(
-        "SELECT id FROM accounts WHERE uname = ?", ("admin",)).fetchone()
+        "SELECT id FROM accounts WHERE uname = ?", ("admin",)
+    ).fetchone()
     if not existing:
-        cursor.execute("INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?);",
-                       ("admin", generate_password_hash("admin"), "4", "active"))
+        cursor.execute(
+            "INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?);",
+            ("admin", generate_password_hash("admin"), "4", "active"),
+        )
     conn.commit()
     conn.close()
 
@@ -199,14 +201,16 @@ def get_accounts():
     finally:
         conn.close()
 
+
 @contextmanager
 def get_kompass():
-        conn = sqlite3.connect("app/db/kompass.db")
-        conn.row_factory = sqlite3.Row
-        try:
-                yield conn
-        finally:
-                conn.close()
+    conn = sqlite3.connect("app/db/kompass.db")
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
+
 
 class User(UserMixin):
     def __init__(self, id, username, role):

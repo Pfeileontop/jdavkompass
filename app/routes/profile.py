@@ -1,10 +1,12 @@
 from flask import Blueprint, render_template, request
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import current_user, login_required
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app.models import get_accounts
-from flask_login import login_required, current_user
 from app.routes.auth import require_role
 
-profile_bp = Blueprint('profile', __name__)
+profile_bp = Blueprint("profile", __name__)
+
 
 @profile_bp.route("/profile", methods=["GET", "POST"])
 @login_required
@@ -14,10 +16,8 @@ def profile():
     success = None
 
     with get_accounts() as conn:
-        # Load user data from DB
         user = conn.execute(
-            "SELECT id, uname, password FROM accounts WHERE id = ?",
-            (current_user.id,)
+            "SELECT id, uname, password FROM accounts WHERE id = ?", (current_user.id,)
         ).fetchone()
 
         if request.method == "POST":
@@ -32,8 +32,8 @@ def profile():
             else:
                 hashed = generate_password_hash(new_password)
                 conn.execute(
-                    "UPDATE accounts SET password = ? WHERE id = ?", 
-                    (hashed, user["id"])
+                    "UPDATE accounts SET password = ? WHERE id = ?",
+                    (hashed, user["id"]),
                 )
                 conn.commit()
                 success = "Passwort erfolgreich geändert."

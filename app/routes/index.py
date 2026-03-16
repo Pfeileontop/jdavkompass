@@ -1,11 +1,13 @@
-from flask import Blueprint
-from flask import render_template
 import datetime
-from app.utils import jugendgruppen_preview
-from flask_login import login_required, current_user
-from app.routes.auth import require_role
 
-index_bp = Blueprint('index', __name__)
+from flask import Blueprint, render_template
+from flask_login import current_user, login_required
+
+from app.routes.auth import require_role
+from app.utils import jugendgruppen_preview
+
+index_bp = Blueprint("index", __name__)
+
 
 @index_bp.route("/")
 @login_required
@@ -13,7 +15,17 @@ index_bp = Blueprint('index', __name__)
 def index():
     user = current_user
 
-    today = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag","Samstag", "Sonntag"][datetime.datetime.today().weekday()]
+    today = [
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag",
+        "Sonntag",
+    ][datetime.datetime.today().weekday()]
 
     heutige_gruppen = [g for g in jugendgruppen_preview() if g["wochentag"] == today]
-    return render_template("index.html", user=user, today=today, heutige_gruppen=heutige_gruppen)
+    return render_template(
+        "index.html", user=user, today=today, heutige_gruppen=heutige_gruppen
+    )

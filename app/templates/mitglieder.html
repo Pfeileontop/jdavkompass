@@ -35,7 +35,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <form action="{{ url_for('mitgliederregistrierung.mitgliederuebersicht') }}" 
+                        <form action="{{ url_for('mitglieder.mitglieder') }}" 
                               method="POST" style="display:flex; gap:5px;">
                             <input type="hidden" name="mitglied_id" value="{{ mitglied.id }}">
                             <button type="submit" name="action" value="approve" class="btn btn-success">
@@ -87,7 +87,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{{ url_for('mitgliederregistrierung.mitglied_bearbeiten', id=mitglied.id) }}" 
+                        <a href="{{ url_for('mitglieder.mitglied_bearbeiten', id=mitglied.id) }}" 
                            class="btn btn-primary">
                             Bearbeiten
                         </a>

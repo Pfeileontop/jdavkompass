@@ -1,5 +1,6 @@
 from app.models import get_kompass
 
+
 def jugendgruppen_preview():
     result = []
 
@@ -14,22 +15,26 @@ def jugendgruppen_preview():
         for gruppe in gruppen:
             gruppe_id, name, wochentag, startzeit, endzeit = gruppe
 
-            # Gruppenleiter für die Gruppe abfragen
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT g.vorname || ' ' || g.nachname
                 FROM gruppenleiter g
                 JOIN gruppenleiter_jugendgruppen gj ON g.id = gj.gruppenleiter_id
                 WHERE gj.jugendgruppe_id = ?
-            """, (gruppe_id,))
+            """,
+                (gruppe_id,),
+            )
             gruppenleiter = [row[0] for row in cursor.fetchall()]
 
-            # Mitglieder für die Gruppe abfragen
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT m.vorname || ' ' || m.nachname
                 FROM mitglieder m
                 JOIN mitglied_jugendgruppen mj ON m.id = mj.mitglied_id
                 WHERE mj.jugendgruppe_id = ?
-            """, (gruppe_id,))
+            """,
+                (gruppe_id,),
+            )
             mitglieder = [row[0] for row in cursor.fetchall()]
 
             gruppe_dict = {
@@ -39,7 +44,7 @@ def jugendgruppen_preview():
                 "startzeit": startzeit,
                 "endzeit": endzeit,
                 "gruppenleiter": gruppenleiter,
-                "mitglieder": mitglieder
+                "mitglieder": mitglieder,
             }
 
             result.append(gruppe_dict)
