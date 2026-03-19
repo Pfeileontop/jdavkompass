@@ -1,4 +1,4 @@
-JDAV Kompass ist ein Webtool zur Verwaltung von Jugendgruppen der JDAV Hildesheim, entwickelt für die Anforderungen eines einzelnen Vereins. Die App unterstützt die Organisation von Gruppen, Mitgliedern, Gruppenleitern und deren Anwesenheit auf eine einfache, sichere und zentrale Weise.
+JDAV Kompass ist ein Webtool zur Verwaltung von Jugendgruppen der JDAV Hildesheim. Die App unterstützt die Organisation von Gruppen, Mitgliedern, Gruppenleitern und deren Anwesenheit auf eine einfache, sichere und zentrale Weise.
 
 Was Kompass kann?
 
