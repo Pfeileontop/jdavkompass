@@ -233,6 +233,10 @@ button {
     margin-bottom: 3rem;
 }
 
+.table-container.mitglieder-container {
+    max-width: 80vw;
+}
+
 .anwesenheitsliste table {
     table-layout: fixed;
     width: max-content;

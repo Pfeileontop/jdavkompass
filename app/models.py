@@ -15,6 +15,7 @@ geburtsdatum DATE not NULL,
 geschlecht TEXT,
 adresse_id INTEGER,
 unterschrift TEXT,
+mitgliedsnummer TEXT,
 FOREIGN KEY (adresse_id) REFERENCES adressen(id)
 );
 """,

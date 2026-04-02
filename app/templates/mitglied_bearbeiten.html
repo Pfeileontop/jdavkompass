@@ -42,6 +42,11 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label>Mitgliedsnummer</label>
+                        <input type="text" name="mitgliedsnummer" value="{{ mitglied.mitgliedsnummer }}">
+                    </div>
+
                 </div>
             </div>
 
@@ -78,31 +83,27 @@
 
                 <div class="form-grid">
 
-                    {% for eb in erziehungsberechtigte %}
-
-                    <input type="hidden" name="eb_id" value="{{ eb.id }}">
+                    <input type="hidden" name="eb_id" value="{{ erziehungsberechtigte.id }}">
 
                     <div class="form-group">
                         <label>Vorname</label>
-                        <input type="text" name="eb_vorname" value="{{ eb.vorname }}">
+                        <input type="text" name="eb_vorname" value="{{ erziehungsberechtigte.vorname }}">
                     </div>
 
                     <div class="form-group">
                         <label>Nachname</label>
-                        <input type="text" name="eb_nachname" value="{{ eb.nachname }}">
+                        <input type="text" name="eb_nachname" value="{{ erziehungsberechtigte.nachname }}">
                     </div>
 
                     <div class="form-group">
                         <label>Email</label>
-                        <input type="email" name="eb_email" value="{{ eb.email }}">
+                        <input type="email" name="eb_email" value="{{ erziehungsberechtigte.email }}">
                     </div>
 
                     <div class="form-group">
                         <label>Telefon</label>
-                        <input type="text" name="eb_telefon" value="{{ eb.telefon }}">
+                        <input type="text" name="eb_telefon" value="{{ erziehungsberechtigte.telefon }}">
                     </div>
-
-                    {% endfor %}
 
                 </div>
             </div>

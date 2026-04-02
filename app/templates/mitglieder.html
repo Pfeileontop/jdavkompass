@@ -6,7 +6,7 @@
 <section class="page-section">
     <h1>Mitgliedermanagement</h1>
 
-    <div class="table-container">
+    <div class="table-container mitglieder-container">
         <h3>Mitglieder Genehmigen</h3>
 
         {% if mitglieder_unapproved_daten %}
@@ -42,11 +42,7 @@
                         {{ mitglied.plz }} {{ mitglied.ort }}
                     </td>
                     <td>
-                        {% if mitglied.erziehungsberechtigte %}
-                            {{ mitglied.erziehungsberechtigte }}
-                        {% else %}
-                            Keine Angaben
-                        {% endif %}
+                        {{mitglied.erziehungsberechtigte.vorname}} {{mitglied.erziehungsberechtigte.nachname}} {{mitglied.erziehungsberechtigte.email}} {{mitglied.erziehungsberechtigte.telefon}}
                     </td>
                     <td>
                         {% if mitglied.unterschrift %}
@@ -56,7 +52,7 @@
                         {% endif %}
                     </td>
                     <td>
-                    {% if mitglied.mitgliedschaft_bestaetigt %}
+                    {% if mitglied.mitgliedschaft %}
                         ✅
                     {% else %}
                         ❌
@@ -64,7 +60,7 @@
                     </td>
 
                     <td>
-                    {% if mitglied.beitraege_bestaetigt %}
+                    {% if mitglied.beitraege %}
                         ✅
                     {% else %}
                         ❌
@@ -98,11 +94,12 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Geburtsdatum</th>
+                    <th>Mitgliedsnummer</th>
                     <th>Geschlecht</th>
                     <th>Adresse</th>
                     <th>Erziehungsberechtigte</th>
                     <th>Gruppen</th>
-                    <th>Aktionen</th>
+                    <th>Aktion</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,29 +108,27 @@
                     <td>{{ mitglied.id }}</td>
                     <td>{{ mitglied.vorname }} {{ mitglied.nachname }}</td>
                     <td>{{ mitglied.geburtsdatum }}</td>
+                    <td>{% if mitglied.mitgliedsnummer %}
+                        {{mitglied.mitgliedsnummer}}
+                        {% else %}
+                        Mitgliedsnummer fehlt
+                        {% endif %}
+                    </td>
                     <td>
                         {% if mitglied.geschlecht == "m" %}M
                         {% elif mitglied.geschlecht == "w" %}W
                         {% elif mitglied.geschlecht == "d" %}D
                         {% else %}-{% endif %}
                     </td>
+                    <td>{{mitglied.strasse}} {{mitglied.hausnummer}} {{mitglied.plz}} {{mitglied.ort}}</td>
                     <td>
-                        {{ mitglied.strasse }} {{ mitglied.hausnummer }}<br>
-                        {{ mitglied.plz }} {{ mitglied.ort }}
+                        {{mitglied.erziehungsberechtigte.vorname}} {{mitglied.erziehungsberechtigte.nachname}} {{mitglied.erziehungsberechtigte.email}} {{mitglied.erziehungsberechtigte.telefon}}
                     </td>
+
                     <td>
-                        {% if mitglied.erziehungsberechtigte %}
-                            {{ mitglied.erziehungsberechtigte }}
-                        {% else %}
-                            Keine Angaben
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if mitglied.gruppen %}
-                            {{ mitglied.gruppen }}
-                        {% else %}
-                            Keine Gruppe
-                        {% endif %}
+                        {% for gruppe in mitglied.gruppen %}
+                            {{ gruppe.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
                     </td>
                     <td>
                         <a href="{{ url_for('mitglieder.mitglied_bearbeiten', id=mitglied.id) }}" class="btn btn-primary">

@@ -12,75 +12,206 @@ def anmeldung():
     if request.method == "GET":
         return render_template("anmeldung.html")
 
-    mitglied_vorname = request.form.get("mitglied_vorname")
-    mitglied_nachname = request.form.get("mitglied_nachname")
-    mitglied_geburtsdatum = request.form.get("mitglied_geburtsdatum")
-    mitglied_geschlecht = request.form.get("mitglied_geschlecht")
+    if request.method == "POST":
+        mitglied_vorname = request.form.get("mitglied_vorname")
+        mitglied_nachname = request.form.get("mitglied_nachname")
+        mitglied_geburtsdatum = request.form.get("mitglied_geburtsdatum")
+        mitglied_geschlecht = request.form.get("mitglied_geschlecht")
 
-    strasse = request.form.get("strasse")
-    hausnummer = request.form.get("hausnummer")
-    plz = request.form.get("plz")
-    ort = request.form.get("ort")
+        strasse = request.form.get("strasse")
+        hausnummer = request.form.get("hausnummer")
+        plz = request.form.get("plz")
+        ort = request.form.get("ort")
 
-    eb_vorname = request.form.get("eb_vorname")
-    eb_nachname = request.form.get("eb_nachname")
-    eb_email = request.form.get("eb_email")
-    eb_telefon = request.form.get("eb_telefon")
+        eb_vorname = request.form.get("eb_vorname")
+        eb_nachname = request.form.get("eb_nachname")
+        eb_email = request.form.get("eb_email")
+        eb_telefon = request.form.get("eb_telefon")
 
-    mitgliedschaft = request.form.get("mitgliedschaft_bestaetigt")
-    beitraege = request.form.get("beitraege_bestaetigt")
-    unterschrift = request.form.get("unterschrift")
+        mitgliedschaft = request.form.get("mitgliedschaft_bestaetigt")
+        beitraege = request.form.get("beitraege_bestaetigt")
+        unterschrift = request.form.get("unterschrift")
 
+        with get_kompass() as conn:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                """
+                INSERT INTO adressen_unapproved (strasse, hausnummer, plz, ort)
+                VALUES (?, ?, ?, ?)
+            """,
+                (strasse, hausnummer, plz, ort),
+            )
+            adresse_id = cursor.lastrowid
+            cursor.execute(
+                """
+                INSERT INTO erziehungsberechtigte_unapproved (vorname, nachname, email, telefon, adresse_id)
+                VALUES (?, ?, ?, ?, ?)
+            """,
+                (eb_vorname, eb_nachname, eb_email, eb_telefon, adresse_id),
+            )
+            eb_id = cursor.lastrowid
+            cursor.execute(
+                """
+                INSERT INTO mitglieder_unapproved (vorname, nachname, geburtsdatum, geschlecht, adresse_id, unterschrift, mitgliedschaft, beitraege)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    mitglied_vorname,
+                    mitglied_nachname,
+                    mitglied_geburtsdatum,
+                    mitglied_geschlecht,
+                    adresse_id,
+                    unterschrift,
+                    mitgliedschaft,
+                    beitraege,
+                ),
+            )
+            mitglied_id = cursor.lastrowid
+            cursor.execute(
+                """
+                INSERT INTO mitglied_erziehungsberechtigte_unapproved (mitglied_id, erziehungsberechtigter_id)
+                VALUES (?, ?)
+            """,
+                (mitglied_id, eb_id),
+            )
+
+            conn.commit()
+
+    return render_template("erfolg.html")
+
+
+def get_mitglieder_daten(mitglied_id=None, unterschrift=False):
     with get_kompass() as conn:
         cursor = conn.cursor()
 
-        cursor.execute(
-            """
-            INSERT INTO adressen_unapproved (strasse, hausnummer, plz, ort)
-            VALUES (?, ?, ?, ?)
-        """,
-            (strasse, hausnummer, plz, ort),
+        select_fields = "m.id, m.vorname, m.nachname, m.geburtsdatum, m.geschlecht, m.adresse_id, m.mitgliedsnummer"
+        if unterschrift:
+            select_fields += ", m.unterschrift"
+        sql = f"""
+        SELECT
+            {select_fields},
+            a.strasse, a.hausnummer, a.plz, a.ort
+        FROM mitglieder m
+        LEFT JOIN adressen a ON m.adresse_id = a.id
+        """
+        params = ()
+        if mitglied_id is not None:
+            sql += " WHERE m.id = ?"
+            params = (mitglied_id,)
+
+        cursor.execute(sql, params)
+        mitglieder_rows = cursor.fetchall()
+        mitglieder_daten = []
+
+        for m in mitglieder_rows:
+            m_dict = dict(m)
+            cursor.execute(
+                """
+                SELECT j.*
+                FROM jugendgruppen j
+                JOIN mitglied_jugendgruppen mj ON j.id = mj.jugendgruppe_id
+                WHERE mj.mitglied_id = ?
+            """,
+                (m["id"],),
+            )
+            gruppen = [dict(row) for row in cursor.fetchall()]
+
+            cursor.execute(
+                """
+                SELECT e.*
+                FROM erziehungsberechtigte e
+                JOIN mitglied_erziehungsberechtigte me ON e.id = me.erziehungsberechtigter_id
+                WHERE me.mitglied_id = ?
+                LIMIT 1
+            """,
+                (m["id"],),
+            )
+            erziehungsberechtigte_row = cursor.fetchone()
+            erziehungsberechtigte = (
+                dict(erziehungsberechtigte_row) if erziehungsberechtigte_row else None
+            )
+
+            mitglieder_daten.append(
+                {
+                    **m_dict,
+                    "gruppen": gruppen,
+                    "erziehungsberechtigte": erziehungsberechtigte,
+                }
+            )
+
+    if mitglied_id is not None:
+        return mitglieder_daten[0] if mitglieder_daten else None
+
+    return mitglieder_daten
+
+
+def get_unapproved_mitglieder_daten():
+    with get_kompass() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 
+                m.id, m.vorname, m.nachname, m.geburtsdatum, m.geschlecht,
+                m.unterschrift, m.mitgliedschaft, m.beitraege,
+                a.strasse, a.hausnummer, a.plz, a.ort
+            FROM mitglieder_unapproved m
+            LEFT JOIN adressen_unapproved a ON m.adresse_id = a.id
+            ORDER BY m.nachname
+        """)
+
+        mitglieder_rows = cursor.fetchall()
+        mitglieder_unapproved_daten = []
+
+        for m in mitglieder_rows:
+            m_dict = dict(m)
+
+            cursor.execute(
+                """
+                SELECT e.*
+                FROM erziehungsberechtigte_unapproved e
+                JOIN mitglied_erziehungsberechtigte_unapproved me
+                  ON e.id = me.erziehungsberechtigter_id
+                WHERE me.mitglied_id = ?
+                LIMIT 1
+            """,
+                (m["id"],),
+            )
+            eb_row = cursor.fetchone()
+            erziehungsberechtigte = dict(eb_row) if eb_row else None
+
+            mitglieder_unapproved_daten.append(
+                {**m_dict, "erziehungsberechtigte": erziehungsberechtigte}
+            )
+
+    return mitglieder_unapproved_daten
+
+
+def delete_unapproved(cursor, mitglied_id):
+    cursor.execute(
+        "SELECT adresse_id FROM mitglieder_unapproved WHERE id = ?", (mitglied_id,)
+    )
+    adresse_id = cursor.fetchone()["adresse_id"]
+
+    cursor.execute(
+        "DELETE FROM mitglied_erziehungsberechtigte_unapproved WHERE mitglied_id = ?",
+        (mitglied_id,),
+    )
+
+    cursor.execute(
+        """
+        DELETE FROM erziehungsberechtigte_unapproved
+        WHERE id IN (
+            SELECT erziehungsberechtigter_id
+            FROM mitglied_erziehungsberechtigte_unapproved
+            WHERE mitglied_id = ?
         )
-        adresse_id = cursor.lastrowid
-
-        cursor.execute(
-            """
-            INSERT INTO erziehungsberechtigte_unapproved (vorname, nachname, email, telefon, adresse_id)
-            VALUES (?, ?, ?, ?, ?)
         """,
-            (eb_vorname, eb_nachname, eb_email, eb_telefon, adresse_id),
-        )
-        eb_id = cursor.lastrowid
+        (mitglied_id,),
+    )
 
-        cursor.execute(
-            """
-            INSERT INTO mitglieder_unapproved (vorname, nachname, geburtsdatum, geschlecht, adresse_id, unterschrift, mitgliedschaft, beitraege)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                mitglied_vorname,
-                mitglied_nachname,
-                mitglied_geburtsdatum,
-                mitglied_geschlecht,
-                adresse_id,
-                unterschrift,
-                mitgliedschaft,
-                beitraege,
-            ),
-        )
-        mitglied_id = cursor.lastrowid
-
-        cursor.execute(
-            """
-            INSERT INTO mitglied_erziehungsberechtigte_unapproved (mitglied_id, erziehungsberechtigter_id, rolle)
-            VALUES (?, ?, ?)
-        """,
-            (mitglied_id, eb_id, "Elternteil"),
-        )
-
-        conn.commit()
-
-    return render_template("erfolg.html")
+    cursor.execute("DELETE FROM adressen_unapproved WHERE id = ?", (adresse_id,))
+    cursor.execute("DELETE FROM mitglieder_unapproved WHERE id = ?", (mitglied_id,))
 
 
 @mitglieder_bp.route("/mitglieder", methods=["GET", "POST"])
@@ -88,119 +219,8 @@ def anmeldung():
 @require_role(3)
 def mitglieder():
     if request.method == "GET":
-        with get_kompass() as conn:
-            cursor = conn.cursor()
-
-            cursor.execute("""
-                SELECT 
-                    m.id,
-                    m.vorname,
-                    m.nachname,
-                    m.geburtsdatum,
-                    m.geschlecht,
-                    m.unterschrift,
-                    m.mitgliedschaft,
-                    m.beitraege,
-
-                    a.strasse,
-                    a.hausnummer,
-                    a.plz,
-                    a.ort,
-
-                    GROUP_CONCAT(
-                        e.vorname || ' ' || e.nachname || 
-                        ' (' || e.email || ', ' || e.telefon || ')',
-                        ' | '
-                    ) as erziehungsberechtigte
-
-                FROM mitglieder_unapproved m
-                LEFT JOIN adressen_unapproved a 
-                    ON m.adresse_id = a.id
-                LEFT JOIN mitglied_erziehungsberechtigte_unapproved me 
-                    ON m.id = me.mitglied_id
-                LEFT JOIN erziehungsberechtigte_unapproved e 
-                    ON me.erziehungsberechtigter_id = e.id
-
-                GROUP BY m.id
-                ORDER BY m.nachname
-            """)
-
-            mitglieder_unapproved = cursor.fetchall()
-
-            mitglieder_unapproved_daten = []
-            for mitglied in mitglieder_unapproved:
-                mitglieder_unapproved_daten.append(
-                    {
-                        "id": mitglied["id"],
-                        "vorname": mitglied["vorname"],
-                        "nachname": mitglied["nachname"],
-                        "geburtsdatum": mitglied["geburtsdatum"],
-                        "geschlecht": mitglied["geschlecht"],
-                        "mitgliedschaft_bestaetigt": mitglied["mitgliedschaft"],
-                        "beitraege_bestaetigt": mitglied["beitraege"],
-                        "unterschrift": mitglied["unterschrift"],
-                        "strasse": mitglied["strasse"],
-                        "hausnummer": mitglied["hausnummer"],
-                        "plz": mitglied["plz"],
-                        "ort": mitglied["ort"],
-                        "erziehungsberechtigte": mitglied["erziehungsberechtigte"],
-                    }
-                )
-
-            cursor.execute("""
-    SELECT 
-        m.id,
-        m.vorname,
-        m.nachname,
-        m.geburtsdatum,
-        m.geschlecht,
-
-        a.strasse,
-        a.hausnummer,
-        a.plz,
-        a.ort,
-
-        GROUP_CONCAT(DISTINCT j.name) as gruppen,
-
-        GROUP_CONCAT(
-            DISTINCT e.vorname || ' ' || e.nachname
-        ) as erziehungsberechtigte
-
-    FROM mitglieder m
-    LEFT JOIN adressen a 
-        ON m.adresse_id = a.id
-    LEFT JOIN mitglied_jugendgruppen mj 
-        ON m.id = mj.mitglied_id
-    LEFT JOIN jugendgruppen j 
-        ON mj.jugendgruppe_id = j.id
-    LEFT JOIN mitglied_erziehungsberechtigte me
-        ON m.id = me.mitglied_id
-    LEFT JOIN erziehungsberechtigte e
-        ON me.erziehungsberechtigter_id = e.id
-
-    GROUP BY m.id
-    ORDER BY m.nachname
-""")
-
-            mitglieder = cursor.fetchall()
-
-            mitglieder_daten = []
-            for mitglied in mitglieder:
-                mitglieder_daten.append(
-                    {
-                        "id": mitglied["id"],
-                        "vorname": mitglied["vorname"],
-                        "nachname": mitglied["nachname"],
-                        "geburtsdatum": mitglied["geburtsdatum"],
-                        "geschlecht": mitglied["geschlecht"],
-                        "strasse": mitglied["strasse"],
-                        "hausnummer": mitglied["hausnummer"],
-                        "plz": mitglied["plz"],
-                        "ort": mitglied["ort"],
-                        "gruppen": mitglied["gruppen"],
-                        "erziehungsberechtigte": mitglied["erziehungsberechtigte"],
-                    }
-                )
+        mitglieder_daten = get_mitglieder_daten()
+        mitglieder_unapproved_daten = get_unapproved_mitglieder_daten()
 
         return render_template(
             "mitglieder.html",
@@ -217,7 +237,6 @@ def mitglieder():
 
         with get_kompass() as conn:
             cursor = conn.cursor()
-
             if action == "approve":
 
                 cursor.execute(
@@ -277,89 +296,11 @@ def mitglieder():
                     (mitglied_id_neu, erziehungsberechtigter_id_neu, mitglied_id),
                 )
 
-                cursor.execute(
-                    """
-                    DELETE FROM mitglied_erziehungsberechtigte_unapproved
-                    WHERE mitglied_id = ?
-                """,
-                    (mitglied_id,),
-                )
-
-                cursor.execute(
-                    """
-                    DELETE FROM erziehungsberechtigte_unapproved
-                    WHERE id IN (
-                        SELECT erziehungsberechtigter_id
-                        FROM mitglied_erziehungsberechtigte_unapproved
-                        WHERE mitglied_id = ?
-                    )
-                """,
-                    (mitglied_id,),
-                )
-
-                cursor.execute(
-                    """
-                    DELETE FROM adressen_unapproved
-                    WHERE id = ?
-                """,
-                    (adresse_id,),
-                )
-
-                cursor.execute(
-                    """
-                    DELETE FROM mitglieder_unapproved
-                    WHERE id = ?
-                """,
-                    (mitglied_id,),
-                )
+                delete_unapproved(cursor, mitglied_id)
 
             elif action == "reject":
 
-                cursor.execute(
-                    """
-                    SELECT adresse_id
-                    FROM mitglieder_unapproved
-                    WHERE id = ?
-                """,
-                    (mitglied_id,),
-                )
-                adresse_id = cursor.fetchone()["adresse_id"]
-
-                cursor.execute(
-                    """
-                    DELETE FROM mitglied_erziehungsberechtigte_unapproved
-                    WHERE mitglied_id = ?
-                """,
-                    (mitglied_id,),
-                )
-
-                cursor.execute(
-                    """
-                    DELETE FROM erziehungsberechtigte_unapproved
-                    WHERE id IN (
-                        SELECT erziehungsberechtigter_id
-                        FROM mitglied_erziehungsberechtigte_unapproved
-                        WHERE mitglied_id = ?
-                    )
-                """,
-                    (mitglied_id,),
-                )
-
-                cursor.execute(
-                    """
-                    DELETE FROM adressen_unapproved
-                    WHERE id = ?
-                """,
-                    (adresse_id,),
-                )
-
-                cursor.execute(
-                    """
-                    DELETE FROM mitglieder_unapproved
-                    WHERE id = ?
-                """,
-                    (mitglied_id,),
-                )
+                delete_unapproved(cursor, mitglied_id)
 
             conn.commit()
 
@@ -370,68 +311,34 @@ def mitglieder():
 @login_required
 @require_role(3)
 def mitglied_bearbeiten(id):
-    with get_kompass() as conn:
-        cursor = conn.cursor()
+    if request.method == "GET":
+        mitglied = get_mitglieder_daten(mitglied_id=id)
+        erziehungsberechtigte = mitglied.get("erziehungsberechtigte", [])
 
-        if request.method == "GET":
+        return render_template(
+            "mitglied_bearbeiten.html",
+            mitglied=mitglied,
+            erziehungsberechtigte=erziehungsberechtigte,
+        )
 
-            cursor.execute(
-                """
-                SELECT 
-                    m.id,
-                    m.vorname,
-                    m.nachname,
-                    m.geburtsdatum,
-                    m.geschlecht,
-                    m.adresse_id,
-                    a.strasse,
-                    a.hausnummer,
-                    a.plz,
-                    a.ort
-                FROM mitglieder m
-                LEFT JOIN adressen a
-                ON m.adresse_id = a.id
-                WHERE m.id = ?
-            """,
-                (id,),
-            )
-            mitglied = cursor.fetchone()
-
-            cursor.execute(
-                """
-                SELECT 
-                    e.id,
-                    e.vorname,
-                    e.nachname,
-                    e.email,
-                    e.telefon,
-                    me.rolle
-                FROM erziehungsberechtigte e
-                JOIN mitglied_erziehungsberechtigte me
-                ON e.id = me.erziehungsberechtigter_id
-                WHERE me.mitglied_id = ?
-            """,
-                (id,),
-            )
-            erziehungsberechtigte = cursor.fetchall()
-
-            return render_template(
-                "mitglied_bearbeiten.html",
-                mitglied=mitglied,
-                erziehungsberechtigte=erziehungsberechtigte,
-            )
-
-        if request.method == "POST":
+    if request.method == "POST":
+        with get_kompass() as conn:
+            cursor = conn.cursor()
 
             vorname = request.form.get("vorname")
             nachname = request.form.get("nachname")
             geburtsdatum = request.form.get("geburtsdatum")
             geschlecht = request.form.get("geschlecht")
-
+            mitgliedsnummer = request.form.get("mitgliedsnummer")
             strasse = request.form.get("strasse")
             hausnummer = request.form.get("hausnummer")
             plz = request.form.get("plz")
             ort = request.form.get("ort")
+            eb_id = request.form.get("eb_id")
+            eb_vorname = request.form.get("eb_vorname")
+            eb_nachname = request.form.get("eb_nachname")
+            eb_email = request.form.get("eb_email")
+            eb_telefon = request.form.get("eb_telefon")
 
             cursor.execute(
                 """
@@ -440,10 +347,11 @@ def mitglied_bearbeiten(id):
                     vorname = ?,
                     nachname = ?,
                     geburtsdatum = ?,
-                    geschlecht = ?
+                    geschlecht = ?,
+                    mitgliedsnummer = ?
                 WHERE id = ?
             """,
-                (vorname, nachname, geburtsdatum, geschlecht, id),
+                (vorname, nachname, geburtsdatum, geschlecht, mitgliedsnummer, id),
             )
 
             cursor.execute(
@@ -463,32 +371,25 @@ def mitglied_bearbeiten(id):
                 (strasse, hausnummer, plz, ort, id),
             )
 
-            eb_ids = request.form.getlist("eb_id")
-            eb_vornamen = request.form.getlist("eb_vorname")
-            eb_nachnamen = request.form.getlist("eb_nachname")
-            eb_emails = request.form.getlist("eb_email")
-            eb_telefone = request.form.getlist("eb_telefon")
-
-            for i, eb_id in enumerate(eb_ids):
-                cursor.execute(
-                    """
-                    UPDATE erziehungsberechtigte
-                    SET
-                        vorname = ?,
-                        nachname = ?,
-                        email = ?,
-                        telefon = ?
-                    WHERE id = ?
-                """,
-                    (
-                        eb_vornamen[i],
-                        eb_nachnamen[i],
-                        eb_emails[i],
-                        eb_telefone[i],
-                        eb_id,
-                    ),
-                )
+            cursor.execute(
+                """
+                UPDATE erziehungsberechtigte
+                SET
+                    vorname = ?,
+                    nachname = ?,
+                    email = ?,
+                    telefon = ?
+                WHERE id = ?
+            """,
+                (
+                    eb_vorname,
+                    eb_nachname,
+                    eb_email,
+                    eb_telefon,
+                    eb_id,
+                ),
+            )
 
             conn.commit()
 
-            return redirect(url_for("mitglieder.mitglieder"))
+        return redirect(url_for("mitglieder.mitglieder"))
