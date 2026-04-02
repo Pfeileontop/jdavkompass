@@ -7,11 +7,19 @@ def jugendgruppen_preview():
     with get_kompass() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id, name, wochentag, startzeit, endzeit
-            FROM jugendgruppen
-        """)
+    SELECT id, name, wochentag, startzeit, endzeit
+    FROM jugendgruppen
+    ORDER BY CASE wochentag
+        WHEN 'Montag' THEN 1
+        WHEN 'Dienstag' THEN 2
+        WHEN 'Mittwoch' THEN 3
+        WHEN 'Donnerstag' THEN 4
+        WHEN 'Freitag' THEN 5
+        WHEN 'Samstag' THEN 6
+        WHEN 'Sonntag' THEN 7
+    END
+""")
         gruppen = cursor.fetchall()
-
         for gruppe in gruppen:
             gruppe_id, name, wochentag, startzeit, endzeit = gruppe
 

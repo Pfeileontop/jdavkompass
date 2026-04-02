@@ -27,6 +27,8 @@ def anmeldung():
     eb_email = request.form.get("eb_email")
     eb_telefon = request.form.get("eb_telefon")
 
+    mitgliedschaft = request.form.get("mitgliedschaft_bestaetigt")
+    beitraege = request.form.get("beitraege_bestaetigt")
     unterschrift = request.form.get("unterschrift")
 
     with get_kompass() as conn:
@@ -52,8 +54,8 @@ def anmeldung():
 
         cursor.execute(
             """
-            INSERT INTO mitglieder_unapproved (vorname, nachname, geburtsdatum, geschlecht, adresse_id, unterschrift)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO mitglieder_unapproved (vorname, nachname, geburtsdatum, geschlecht, adresse_id, unterschrift, mitgliedschaft, beitraege)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 mitglied_vorname,
@@ -62,6 +64,8 @@ def anmeldung():
                 mitglied_geschlecht,
                 adresse_id,
                 unterschrift,
+                mitgliedschaft,
+                beitraege,
             ),
         )
         mitglied_id = cursor.lastrowid
@@ -87,7 +91,40 @@ def mitglieder():
         with get_kompass() as conn:
             cursor = conn.cursor()
 
-            cursor.execute("SELECT * FROM mitglieder_unapproved")
+            cursor.execute("""
+                SELECT 
+                    m.id,
+                    m.vorname,
+                    m.nachname,
+                    m.geburtsdatum,
+                    m.geschlecht,
+                    m.unterschrift,
+                    m.mitgliedschaft,
+                    m.beitraege,
+
+                    a.strasse,
+                    a.hausnummer,
+                    a.plz,
+                    a.ort,
+
+                    GROUP_CONCAT(
+                        e.vorname || ' ' || e.nachname || 
+                        ' (' || e.email || ', ' || e.telefon || ')',
+                        ' | '
+                    ) as erziehungsberechtigte
+
+                FROM mitglieder_unapproved m
+                LEFT JOIN adressen_unapproved a 
+                    ON m.adresse_id = a.id
+                LEFT JOIN mitglied_erziehungsberechtigte_unapproved me 
+                    ON m.id = me.mitglied_id
+                LEFT JOIN erziehungsberechtigte_unapproved e 
+                    ON me.erziehungsberechtigter_id = e.id
+
+                GROUP BY m.id
+                ORDER BY m.nachname
+            """)
+
             mitglieder_unapproved = cursor.fetchall()
 
             mitglieder_unapproved_daten = []
@@ -98,27 +135,55 @@ def mitglieder():
                         "vorname": mitglied["vorname"],
                         "nachname": mitglied["nachname"],
                         "geburtsdatum": mitglied["geburtsdatum"],
+                        "geschlecht": mitglied["geschlecht"],
+                        "mitgliedschaft_bestaetigt": mitglied["mitgliedschaft"],
+                        "beitraege_bestaetigt": mitglied["beitraege"],
                         "unterschrift": mitglied["unterschrift"],
+                        "strasse": mitglied["strasse"],
+                        "hausnummer": mitglied["hausnummer"],
+                        "plz": mitglied["plz"],
+                        "ort": mitglied["ort"],
+                        "erziehungsberechtigte": mitglied["erziehungsberechtigte"],
                     }
                 )
 
             cursor.execute("""
-                SELECT 
-                    m.id,
-                    m.vorname,
-                    m.nachname,
-                    m.geburtsdatum,
-                    GROUP_CONCAT(j.name, ', ') as gruppen
-                FROM mitglieder m
-                LEFT JOIN mitglied_jugendgruppen mj 
-                    ON m.id = mj.mitglied_id
-                LEFT JOIN jugendgruppen j 
-                    ON mj.jugendgruppe_id = j.id
-                GROUP BY m.id
-                ORDER BY m.nachname
-            """)
+    SELECT 
+        m.id,
+        m.vorname,
+        m.nachname,
+        m.geburtsdatum,
+        m.geschlecht,
+
+        a.strasse,
+        a.hausnummer,
+        a.plz,
+        a.ort,
+
+        GROUP_CONCAT(DISTINCT j.name) as gruppen,
+
+        GROUP_CONCAT(
+            DISTINCT e.vorname || ' ' || e.nachname
+        ) as erziehungsberechtigte
+
+    FROM mitglieder m
+    LEFT JOIN adressen a 
+        ON m.adresse_id = a.id
+    LEFT JOIN mitglied_jugendgruppen mj 
+        ON m.id = mj.mitglied_id
+    LEFT JOIN jugendgruppen j 
+        ON mj.jugendgruppe_id = j.id
+    LEFT JOIN mitglied_erziehungsberechtigte me
+        ON m.id = me.mitglied_id
+    LEFT JOIN erziehungsberechtigte e
+        ON me.erziehungsberechtigter_id = e.id
+
+    GROUP BY m.id
+    ORDER BY m.nachname
+""")
 
             mitglieder = cursor.fetchall()
+
             mitglieder_daten = []
             for mitglied in mitglieder:
                 mitglieder_daten.append(
@@ -127,7 +192,13 @@ def mitglieder():
                         "vorname": mitglied["vorname"],
                         "nachname": mitglied["nachname"],
                         "geburtsdatum": mitglied["geburtsdatum"],
+                        "geschlecht": mitglied["geschlecht"],
+                        "strasse": mitglied["strasse"],
+                        "hausnummer": mitglied["hausnummer"],
+                        "plz": mitglied["plz"],
+                        "ort": mitglied["ort"],
                         "gruppen": mitglied["gruppen"],
+                        "erziehungsberechtigte": mitglied["erziehungsberechtigte"],
                     }
                 )
 

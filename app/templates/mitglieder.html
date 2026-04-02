@@ -1,10 +1,11 @@
 {% extends "base_intern.html" %}
 
-{% block title %}Dashboard - JDAV Hildesheim{% endblock %}
+{% block title %}Mitgliederübersicht - JDAV Hildesheim{% endblock %}
 
 {% block content %}
 <section class="page-section">
     <h1>Mitgliedermanagement</h1>
+
     <div class="table-container">
         <h3>Mitglieder Genehmigen</h3>
 
@@ -13,10 +14,14 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
+                    <th>Name</th>
                     <th>Geburtsdatum</th>
+                    <th>Geschlecht</th>
+                    <th>Adresse</th>
+                    <th>Erziehungsberechtigte</th>
                     <th>Unterschrift</th>
+                    <th>Mitgliedschaft</th>
+                    <th>Beiträge</th>
                     <th>Aktion</th>
                 </tr>
             </thead>
@@ -24,26 +29,52 @@
                 {% for mitglied in mitglieder_unapproved_daten %}
                 <tr>
                     <td>{{ mitglied.id }}</td>
-                    <td>{{ mitglied.vorname }}</td>
-                    <td>{{ mitglied.nachname }}</td>
+                    <td>{{ mitglied.vorname }} {{ mitglied.nachname }}</td>
                     <td>{{ mitglied.geburtsdatum }}</td>
                     <td>
-                        {% if mitglied.unterschrift %}
-                            <img src="{{ mitglied.unterschrift }}" alt="Unterschrift" width="200">
+                        {% if mitglied.geschlecht == "m" %}M
+                        {% elif mitglied.geschlecht == "w" %}W
+                        {% elif mitglied.geschlecht == "d" %}D
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>
+                        {{ mitglied.strasse }} {{ mitglied.hausnummer }}<br>
+                        {{ mitglied.plz }} {{ mitglied.ort }}
+                    </td>
+                    <td>
+                        {% if mitglied.erziehungsberechtigte %}
+                            {{ mitglied.erziehungsberechtigte }}
                         {% else %}
-                            Keine Unterschrift
+                            Keine Angaben
                         {% endif %}
                     </td>
                     <td>
-                        <form action="{{ url_for('mitglieder.mitglieder') }}" 
-                              method="POST" style="display:flex; gap:5px;">
+                        {% if mitglied.unterschrift %}
+                            <img src="{{ mitglied.unterschrift }}" style="max-width:200px; border:1px solid #ccc;">
+                        {% else %}
+                            Keine
+                        {% endif %}
+                    </td>
+                    <td>
+                    {% if mitglied.mitgliedschaft_bestaetigt %}
+                        ✅
+                    {% else %}
+                        ❌
+                    {% endif %}
+                    </td>
+
+                    <td>
+                    {% if mitglied.beitraege_bestaetigt %}
+                        ✅
+                    {% else %}
+                        ❌
+                    {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('mitglieder.mitglieder') }}" method="POST" style="display:flex; flex-direction:column; gap:5px;">
                             <input type="hidden" name="mitglied_id" value="{{ mitglied.id }}">
-                            <button type="submit" name="action" value="approve" class="btn btn-success">
-                                Genehmigen
-                            </button>
-                            <button type="submit" name="action" value="reject" class="btn btn-remove">
-                                Ablehnen
-                            </button>
+                            <button type="submit" name="action" value="approve" class="btn btn-success">Genehmigen</button>
+                            <button type="submit" name="action" value="reject" class="btn btn-remove">Ablehnen</button>
                         </form>
                     </td>
                 </tr>
@@ -51,7 +82,7 @@
             </tbody>
         </table>
         {% else %}
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-info">
             Keine Mitglieder zur Genehmigung gefunden.
         </div>
         {% endif %}
@@ -65,9 +96,11 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
+                    <th>Name</th>
                     <th>Geburtsdatum</th>
+                    <th>Geschlecht</th>
+                    <th>Adresse</th>
+                    <th>Erziehungsberechtigte</th>
                     <th>Gruppen</th>
                     <th>Aktionen</th>
                 </tr>
@@ -76,9 +109,25 @@
                 {% for mitglied in mitglieder_daten %}
                 <tr>
                     <td>{{ mitglied.id }}</td>
-                    <td>{{ mitglied.vorname }}</td>
-                    <td>{{ mitglied.nachname }}</td>
+                    <td>{{ mitglied.vorname }} {{ mitglied.nachname }}</td>
                     <td>{{ mitglied.geburtsdatum }}</td>
+                    <td>
+                        {% if mitglied.geschlecht == "m" %}M
+                        {% elif mitglied.geschlecht == "w" %}W
+                        {% elif mitglied.geschlecht == "d" %}D
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>
+                        {{ mitglied.strasse }} {{ mitglied.hausnummer }}<br>
+                        {{ mitglied.plz }} {{ mitglied.ort }}
+                    </td>
+                    <td>
+                        {% if mitglied.erziehungsberechtigte %}
+                            {{ mitglied.erziehungsberechtigte }}
+                        {% else %}
+                            Keine Angaben
+                        {% endif %}
+                    </td>
                     <td>
                         {% if mitglied.gruppen %}
                             {{ mitglied.gruppen }}
@@ -87,8 +136,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{{ url_for('mitglieder.mitglied_bearbeiten', id=mitglied.id) }}" 
-                           class="btn btn-primary">
+                        <a href="{{ url_for('mitglieder.mitglied_bearbeiten', id=mitglied.id) }}" class="btn btn-primary">
                             Bearbeiten
                         </a>
                     </td>

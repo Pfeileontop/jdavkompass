@@ -1,6 +1,6 @@
 {% extends "base_intern.html" %}
 
-{% block title %}Profil - JDAV Hildesheim{% endblock %}
+{% block title %}Gruppenübersicht - JDAV Hildesheim{% endblock %}
 
 {% block content %}
 <section class="page-section">
@@ -11,7 +11,7 @@
 
             <div class="gruppe-info">
                 <div class="info-item">
-                    <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
+                    <strong>{{gruppe['wochentag']}} </strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
                 </div>
 
                 {% if gruppe.gruppenleiter %}

@@ -21,6 +21,7 @@
                 <option value="m">Männlich</option>
                 <option value="w">Weiblich</option>
                 <option value="d">Divers</option>
+                <option value="-">Das möchte ich nicht angeben</option>
             </select>
         </label><br>
     </fieldset>
@@ -42,18 +43,47 @@
     </fieldset>
 
     <fieldset>
+        <legend>DAV-Mitgliedschaft</legend>
+        <p>Die Anmeldung erfordert eine existierende Mitgliedschaft im DAV oder einen gestellten DAV Mitgliedsantrag. Ein Aufnahmeantrag kann <a href="https://www.dav-hildesheim.de/verein/service/mitgliedschaft">hier</a> gestellt werden.</p>
+        <label>
+            <input type="checkbox" name="mitgliedschaft_bestaetigt" required> Ich bestätige, dass eine gültige DAV-Mitgliedschaft besteht, oder ein Mitgliedsantrag an den DAV gestellt worden ist.
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>Jugendgruppenbeiträge</legend>
+        <p>Neben der Mitgliedschaft im DAV Sektion Hildesheim erfordert die Teilnahme an einer Jugendgruppe eine monatliche Teilnahmegebühr, welche sich aus einem Betreuungsgeld und dem Jugendgruppeneintrittsgeld zusammen setzt und quartalsweise eingezogen wird.</p>
+        <br>
+        <h4>Betreuungsgeld: (gültig ab dem 1.3.2026)</h4>
+        <p>Jugendgruppe 1,5h: 19€</p>
+        <p>Boudergruppe 1h: 16€</p>
+        <p>Mini Gruppe 1h: 19€</p>
+        <p>Inklusive Gruppe 14 tägig: 14€</p>
+        <h4>Jugendgruppeneintrittspreis: (gültig ab dem 1.02.2024)</h4>
+        <p>Kinder bis 14 Jahren: 13,50€</p>
+        <p>Jugendliche ab 14 Jahren: 25€</p>
+        <p>Für die Inklusive Gruppe wird kein Eintritt fällig</p>
+        <br>
+        <label>
+            <input type="checkbox" name="beitraege_bestaetigt" required>Die Jugendgruppenbeiträge sollen von dem Konto, von dem auch die Mitgliedsbeiträge an die Sektion eingezogen werden, abgebucht werden.
+        </label>
+    </fieldset>
+
+    <fieldset>
         <legend>Unterschrift *Pflichtfeld</legend>
         <label>
-            Bitte im unteren Feld entweder per Finger, sonder per Maus eine Unterschrift angeben.
-        </label><br>
-        <label>
-            Mit einer Unterschrift und mit dem Anmelden des Teilnehmers bestätige ich die Richtigkeit meiner Angaben.
-            Ich bin damit einverstanden, dass während Gruppenaktivitäen Bild und Videomaterial von Gruppenleitenden
+            Im unteren Feld kann eine Unterschrift endweder per Maus oder per Finger gegeben werden.
+        </label>
+        <details class="consent-box">
+        <summary>Mit einer Unterschrift simme ich den folgendem zu:</summary>
+        <div class="consent-text">
+            Ich bestätige die Richtigkeit meiner Angaben. Ich bin damit einverstanden, dass während Gruppenaktivitäen Bild und Videomaterial von Gruppenleitenden
             aufgenommen und für die Medien der JDAV Hildesheim verwendet werden dürfen. Für die Person die ich anmelde
             existiert eine Mitgliedschaft im DAV. Ich bin damit einverstanden, dass meine Daten digital intern verarbeitet
             werden und zum Zwecke der Gruppenorganisation gespeichert werden. Ich bin mit den Kosten der Teilname einverstanden.
             Ich bin für Person, die ich anmelde erziehugsberechtigt.
-        </label>
+        </div>
+        </details>
         <canvas id="signature-pad" style="border: 1px solid #ccc;"></canvas><br>
         <button type="button" onclick="clearSignature()">Unterschrift löschen</button>
         <input type="hidden" name="unterschrift" id="unterschrift">

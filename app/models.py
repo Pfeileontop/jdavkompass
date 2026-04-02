@@ -126,6 +126,8 @@ geburtsdatum DATE not NULL,
 geschlecht TEXT,
 adresse_id INTEGER,
 unterschrift TEXT not NULL,
+mitgliedschaft BOOLEAN not NULL,
+beitraege BOOLEAN not NULL,
 FOREIGN KEY (adresse_id) REFERENCES adressen_unapproved(id)
 );
 """,
