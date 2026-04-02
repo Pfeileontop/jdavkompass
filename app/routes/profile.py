@@ -35,7 +35,6 @@ def profile():
                     "UPDATE accounts SET password = ? WHERE id = ?",
                     (hashed, user["id"]),
                 )
-                conn.commit()
                 success = "Passwort erfolgreich geändert."
 
     return render_template("profile.html", user=user, error=error, success=success)

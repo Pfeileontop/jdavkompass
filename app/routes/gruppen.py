@@ -181,7 +181,6 @@ def gruppe(gruppe_id):
                     """,
                         (gl["id"], gruppe_id, today.date(), anwesend),
                     )
-                conn.commit()
 
             cursor.execute(
                 """
@@ -279,7 +278,6 @@ def neue_gruppe():
         """,
             (name, beschreibung, wochentag, startzeit, endzeit),
         )
-        conn.commit()
 
     return redirect(url_for("gruppen.gruppen"))
 
@@ -298,7 +296,6 @@ def gruppe_loeschen(gruppe_id):
             "DELETE FROM gruppenleiter_jugendgruppen WHERE jugendgruppe_id = ?",
             (gruppe_id,),
         )
-        conn.commit()
 
     return redirect(url_for("gruppen.gruppen"))
 
@@ -328,7 +325,6 @@ def mitglied_zu_gruppe(gruppe_id, mitglied_id):
             """,
                 (mitglied_id, gruppe_id),
             )
-            conn.commit()
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
@@ -359,7 +355,6 @@ def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
             """,
                 (gruppenleiter_id, gruppe_id),
             )
-            conn.commit()
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
@@ -379,7 +374,6 @@ def mitglied_entfernen(gruppe_id, mitglied_id):
         """,
             (gruppe_id, mitglied_id),
         )
-        conn.commit()
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
@@ -400,7 +394,6 @@ def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
         """,
             (gruppe_id, gruppenleiter_id),
         )
-        conn.commit()
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 

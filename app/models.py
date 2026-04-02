@@ -202,6 +202,7 @@ def get_accounts():
     try:
         yield conn
     finally:
+        conn.commit()
         conn.close()
 
 
@@ -212,6 +213,7 @@ def get_kompass():
     try:
         yield conn
     finally:
+        conn.commit()
         conn.close()
 
 

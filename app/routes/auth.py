@@ -14,9 +14,9 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
 
-    if request.method == "POST":
-        username = request.form["username"].strip().lower()
-        password = request.form["password"]
+    else:
+        username = request.form.get("username", "").strip().lower()
+        password = request.form.get("password", "")
 
         with get_accounts() as conn:
             row = conn.execute(
@@ -25,23 +25,22 @@ def login():
             ).fetchone()
 
         error = None
-
-        if row:
-            if row["status"] != "active":
-                error = "Dein Konto wartet noch auf eine Adminbestätigung"
-            elif check_password_hash(row["password"], password):
-                session.clear()
-
-                user = User(row["id"], username, row["role"])
-                login_user(user)
-
-                return redirect("/")
-            else:
-                error = "Falsche Kombination aus Benutzernamen und Passwort."
-        else:
-            error = "Falsche Kombination aus Benutzernamen und Passwort."
         session.clear()
-        return render_template("login.html", error=error)
+
+        if not row:
+            error = "Falsche Kombination aus Benutzernamen und Passwort."
+        elif row["status"] != "active":
+            error = "Dein Konto wartet noch auf eine Adminbestätigung"
+        elif not check_password_hash(row["password"], password):
+            error = "Falsche Kombination aus Benutzernamen und Passwort."
+
+        if error:
+            return render_template("login.html", error=error)
+
+        user = User(row["id"], username, row["role"])
+        login_user(user)
+
+        return redirect("/")
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -49,10 +48,12 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
 
-    if request.method == "POST":
-        username = request.form["username"].strip().lower()
-        password = request.form["password"]
+    else:
+        username = request.form.get("username", "").strip().lower()
+        password = request.form.get("password", "")
         hashed_password = generate_password_hash(password)
+
+        session.clear()
 
         if not username or not password:
             session.clear()
@@ -66,7 +67,6 @@ def register():
             ).fetchone()
 
             if existing:
-                session.clear()
                 return render_template(
                     "register.html", error="Benutzername existiert bereits."
                 )
@@ -75,7 +75,6 @@ def register():
                 "INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?)",
                 (username, hashed_password, 1, "pending"),
             )
-            conn.commit()
         return redirect("/")
 
 

@@ -76,8 +76,6 @@ def anmeldung():
                 (mitglied_id, eb_id),
             )
 
-            conn.commit()
-
     return render_template("erfolg.html")
 
 
@@ -302,8 +300,6 @@ def mitglieder():
 
                 delete_unapproved(cursor, mitglied_id)
 
-            conn.commit()
-
         return redirect(url_for("mitglieder.mitglieder"))
 
 
@@ -389,7 +385,5 @@ def mitglied_bearbeiten(id):
                     eb_id,
                 ),
             )
-
-            conn.commit()
 
         return redirect(url_for("mitglieder.mitglieder"))
