@@ -83,6 +83,7 @@ def save_gruppenleiter(conn, data, id):
 @login_required
 @require_role(4)
 def admin():
+    print(request)
     if request.method == "GET":
         with get_kompass() as conn:
             cursor = conn.cursor()
@@ -111,15 +112,17 @@ def admin():
                 """
             ).fetchall()
 
+        with get_accounts() as conn:
+            cursor = conn.cursor()
             accounts = cursor.execute(
                 "SELECT id, uname, status, role FROM accounts ORDER BY id"
             ).fetchall()
 
-            return render_template(
-                "admin.html",
-                accounts=accounts,
-                gruppenleiter=gruppenleiter,
-            )
+        return render_template(
+            "admin.html",
+            accounts=accounts,
+            gruppenleiter=gruppenleiter,
+        )
 
     else:
         with get_accounts() as conn:
@@ -133,6 +136,7 @@ def admin():
                 delete_account(conn, account_id)
             elif action == "change_role" and new_role in {"1", "2", "3", "4"}:
                 change_account_role(conn, account_id, new_role)
+        return redirect(url_for("admin.admin"))
 
 
 @admin_bp.route("/gruppenleiter/add", methods=["POST"])
