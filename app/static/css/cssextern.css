@@ -129,6 +129,17 @@ button:hover,
     background: oklch(.8 .2 138.9);
 }
 
+fieldset label input[type="checkbox"] {
+    margin-top: 0.2rem;
+}
+
+fieldset label:has(input[type="checkbox"]) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.4;
+}
+
 /* =========================
    AUTH (LOGIN / REGISTER)
 ========================= */
