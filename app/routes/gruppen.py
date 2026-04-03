@@ -18,9 +18,75 @@ from openpyxl.utils import get_column_letter
 
 from app.models import get_kompass
 from app.routes.auth import require_role
-from app.utils import jugendgruppen_preview
+from app.utils import jugendgruppen_preview, heute
 
 gruppen_bp = Blueprint("gruppen", __name__)
+
+
+def neue_gruppe_erstellen(conn, data):
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO jugendgruppen (name, beschreibung, wochentag, startzeit, endzeit)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (data["name"], data["beschreibung"], data[wochentag], data[startzeit], data[endzeit]),
+    )
+
+
+def gruppe_loeschen_helper(conn, gruppe_id):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM jugendgruppen WHERE id = ?", (gruppe_id,))
+    cursor.execute(
+        "DELETE FROM mitglied_jugendgruppen WHERE jugendgruppe_id = ?", (gruppe_id,)
+    )
+    cursor.execute(
+        "DELETE FROM gruppenleiter_jugendgruppen WHERE jugendgruppe_id = ?",
+        (gruppe_id,),
+    )
+
+
+def mitglied_zu_gruppe_hinzufuegen(conn, gruppe_id, mitglied_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT OR IGNORE INTO mitglied_jugendgruppen (mitglied_id, jugendgruppe_id)
+        VALUES (?, ?)
+        """,
+        (mitglied_id, gruppe_id),
+    )
+
+
+def gruppenleiter_zu_gruppe_hinzufuegen(conn, gruppe_id, leiter_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT OR IGNORE INTO gruppenleiter_jugendgruppen (gruppenleiter_id, jugendgruppe_id)
+        VALUES (?, ?)
+        """,
+        (leiter_id, gruppe_id),
+    )
+
+
+def mitglied_aus_gruppe_entfernen(conn, gruppe_id, mitglied_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        DELETE FROM mitglied_jugendgruppen
+        WHERE jugendgruppe_id = ? AND mitglied_id = ?
+    """,
+        (gruppe_id, mitglied_id),
+    )
+
+
+def gruppenleiter_aus_gruppe_entfernen(conn, gruppe_id, leiter_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        DELETE FROM gruppenleiter_jugendgruppen
+        WHERE jugendgruppe_id = ? AND gruppenleiter_id = ?
+    """,
+        (gruppe_id, leiter_id),
+    )
 
 
 @gruppen_bp.route("/gruppen", methods=["GET", "POST"])
@@ -31,69 +97,22 @@ def gruppen():
     return render_template("gruppen.html", gruppen=gruppen)
 
 
-@gruppen_bp.route("/search", methods=["GET"])
-@login_required
-@require_role(1)
-def search():
-    search_query = request.args.get("query", "")
-    if "mitglied" in search_query:
-        search_in = "mitglieder"
-        search_query = search_query.replace("mitglied", "").strip()
-    else:
-        search_in = "gruppenleiter"
-        search_query = search_query.replace("leiter", "").strip()
-    with get_kompass() as conn:
-        cursor = conn.cursor()
-        query = f"""
-            SELECT id, vorname, nachname
-            FROM {search_in}
-            WHERE vorname LIKE ? OR nachname LIKE ?
-            """
-        cursor.execute(query, ("%" + search_query + "%", "%" + search_query + "%"))
-        search_results = cursor.fetchall()
-        print(search_results)
-
-    return jsonify(
-        {
-            "results": [
-                {
-                    "id": row["id"],
-                    "vorname": row["vorname"],
-                    "nachname": row["nachname"],
-                }
-                for row in search_results
-            ]
-        }
-    )
-
-
 @gruppen_bp.route("/gruppen/<int:gruppe_id>", methods=["GET", "POST"])
+@require_role(1)
 @login_required
 def gruppe(gruppe_id):
 
-    if current_user.role < 1:
-        abort(403)
-
     if request.method == "POST" and current_user.role < 2:
         abort(403)
-    today = datetime.datetime.today()
-    today_name = [
-        "Montag",
-        "Dienstag",
-        "Mittwoch",
-        "Donnerstag",
-        "Freitag",
-        "Samstag",
-        "Sonntag",
-    ][today.weekday()]
 
+    today = datetime.datetime.today()
+    today_name = heute()
     anwesenheitheute = {}
     anwesenheitshistorie = {}
     gruppenleiter_anwesenheitheute = {}
     gruppenleiter_anwesenheithistorie = {}
     alle_daten = set()
     total_age = 0
-    count = 0
 
     with get_kompass() as conn:
         cursor = conn.cursor()
@@ -103,8 +122,6 @@ def gruppe(gruppe_id):
             (gruppe_id,),
         )
         gruppe = cursor.fetchone()
-        if not gruppe:
-            abort(404)
 
         cursor.execute(
             """SELECT g.id, g.vorname, g.nachname FROM gruppenleiter g JOIN gruppenleiter_jugendgruppen gj ON g.id = gj.gruppenleiter_id WHERE gj.jugendgruppe_id = ?""",
@@ -125,21 +142,9 @@ def gruppe(gruppe_id):
         mitglieder = cursor.fetchall()
 
         for mitglied in mitglieder:
-            if mitglied["geburtsdatum"]:
-                geburtsdatum = datetime.datetime.strptime(
-                    mitglied["geburtsdatum"], "%Y-%m-%d"
-                )
-                age = (
-                    today.year
-                    - geburtsdatum.year
-                    - (
-                        (today.month, today.day)
-                        < (geburtsdatum.month, geburtsdatum.day)
-                    )
-                )
-                total_age += age
-                count += 1
-        avg_age = int(total_age / count) if count > 0 else 0
+            geburtsdatum = datetime.datetime.strptime(mitglied["geburtsdatum"], "%Y-%m-%d")
+            total_age += (today.year - geburtsdatum.year)
+        avg_age = int(total_age / len(mitglieder)) if len(mitglieder) > 0 else 0
 
         if gruppe["wochentag"] == today_name:
             if request.method == "POST":
@@ -236,28 +241,49 @@ def gruppe(gruppe_id):
     )
 
 
+@gruppen_bp.route("/search", methods=["GET"])
+@login_required
+@require_role(1)
+def search():
+    search_query = request.args.get("query", "")
+    if "mitglied" in search_query:
+        search_in = "mitglieder"
+        search_query = search_query.replace("mitglied", "").strip()
+    else:
+        search_in = "gruppenleiter"
+        search_query = search_query.replace("leiter", "").strip()
+    with get_kompass() as conn:
+        cursor = conn.cursor()
+        query = f"""
+            SELECT id, vorname, nachname
+            FROM {search_in}
+            WHERE vorname LIKE ? OR nachname LIKE ?
+            """
+        cursor.execute(query, ("%" + search_query + "%", "%" + search_query + "%"))
+        search_results = cursor.fetchall()
+        print(search_results)
+
+    return jsonify(
+        {
+            "results": [
+                {
+                    "id": row["id"],
+                    "vorname": row["vorname"],
+                    "nachname": row["nachname"],
+                }
+                for row in search_results
+            ]
+        }
+    )
+
+
 @gruppen_bp.route("/gruppen/neue", methods=["POST"])
 @login_required
 @require_role(3)
 def neue_gruppe():
-    name = request.form.get("name")
-    beschreibung = request.form.get("beschreibung")
-    wochentag = request.form.get("wochentag")
-    startzeit = request.form.get("startzeit")
-    endzeit = request.form.get("endzeit")
-
-    if not name or not wochentag or not startzeit or not endzeit:
-        return "Fehlende Daten!", 400
-
+    data = request.form
     with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO jugendgruppen (name, beschreibung, wochentag, startzeit, endzeit)
-            VALUES (?, ?, ?, ?, ?)
-        """,
-            (name, beschreibung, wochentag, startzeit, endzeit),
-        )
+        neue_gruppe_erstellen(conn, data)
 
     return redirect(url_for("gruppen.gruppen"))
 
@@ -267,113 +293,47 @@ def neue_gruppe():
 @require_role(3)
 def gruppe_loeschen(gruppe_id):
     with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM jugendgruppen WHERE id = ?", (gruppe_id,))
-        cursor.execute(
-            "DELETE FROM mitglied_jugendgruppen WHERE jugendgruppe_id = ?", (gruppe_id,)
-        )
-        cursor.execute(
-            "DELETE FROM gruppenleiter_jugendgruppen WHERE jugendgruppe_id = ?",
-            (gruppe_id,),
-        )
+        gruppe_loeschen_helper(conn, gruppe_id)
 
     return redirect(url_for("gruppen.gruppen"))
 
 
-@gruppen_bp.route(
-    "/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>", methods=["POST"]
-)
+@gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>", methods=["POST"])
 @login_required
 @require_role(3)
 def mitglied_zu_gruppe(gruppe_id, mitglied_id):
     with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT 1 FROM mitglied_jugendgruppen 
-            WHERE mitglied_id = ? AND jugendgruppe_id = ?
-        """,
-            (mitglied_id, gruppe_id),
-        )
-        existing = cursor.fetchone()
-
-        if not existing:
-            cursor.execute(
-                """
-                INSERT INTO mitglied_jugendgruppen (mitglied_id, jugendgruppe_id)
-                VALUES (?, ?)
-            """,
-                (mitglied_id, gruppe_id),
-            )
+        mitglied_zu_gruppe_hinzufuegen(conn, gruppe_id, mitglied_id)
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
 
-@gruppen_bp.route(
-    "/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"]
-)
+@gruppen_bp.route("/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"])
 @login_required
 @require_role(2)
 def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
     with get_kompass() as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            SELECT 1 FROM gruppenleiter_jugendgruppen 
-            WHERE gruppenleiter_id = ? AND jugendgruppe_id = ?
-        """,
-            (gruppenleiter_id, gruppe_id),
-        )
-        existing = cursor.fetchone()
-
-        if not existing:
-            cursor.execute(
-                """
-                INSERT INTO gruppenleiter_jugendgruppen (gruppenleiter_id, jugendgruppe_id)
-                VALUES (?, ?)
-            """,
-                (gruppenleiter_id, gruppe_id),
-            )
+        gruppenleiter_zu_gruppe_hinzufuegen(conn, gruppe_id, gruppenleiter_id)
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
 
-@gruppen_bp.route(
-    "/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"]
-)
+@gruppen_bp.route("/gruppen/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"])
 @login_required
 @require_role(3)
 def mitglied_entfernen(gruppe_id, mitglied_id):
     with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            DELETE FROM mitglied_jugendgruppen
-            WHERE jugendgruppe_id = ? AND mitglied_id = ?
-        """,
-            (gruppe_id, mitglied_id),
-        )
+        mitglied_aus_gruppe_entfernen(conn, gruppe_id, mitglied_id)
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 
 
-@gruppen_bp.route(
-    "/gruppen/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen",
-    methods=["POST"],
-)
+@gruppen_bp.route("/gruppen/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen", methods=["POST"],)
 @login_required
 @require_role(3)
 def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
     with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            DELETE FROM gruppenleiter_jugendgruppen
-            WHERE jugendgruppe_id = ? AND gruppenleiter_id = ?
-        """,
-            (gruppe_id, gruppenleiter_id),
-        )
+        gruppenleiter_aus_gruppe_entfernen(conn, gruppe_id, gruppenleiter_id)
 
     return redirect(url_for("gruppen.gruppe", gruppe_id=gruppe_id))
 

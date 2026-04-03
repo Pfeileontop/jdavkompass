@@ -1,4 +1,18 @@
 from app.models import get_kompass
+import datetime
+
+
+def heute():
+    today = [
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag",
+        "Sonntag",
+    ][datetime.datetime.today().weekday()]
+    return today
 
 
 def jugendgruppen_preview():
