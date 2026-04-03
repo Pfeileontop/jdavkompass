@@ -174,7 +174,8 @@ const gruppeId = {{ gruppe[0] }};
 
 function searchMitglied() {
     var query = document.getElementById("search_mitglied").value;
-    var url = '/search_mitglied?query=' + encodeURIComponent(query);
+    var url = '/search?query=mitglied ' + encodeURIComponent(query); // space separates keyword from actual name
+    console.log(url);
 
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(response => response.json())
@@ -203,7 +204,8 @@ function searchMitglied() {
 
 function searchGruppenleiter() {
     var query = document.getElementById("search_gruppenleiter").value;
-    var url = '/search_gruppenleiter?query=' + encodeURIComponent(query);
+    var url = '/search?query=leiter ' + encodeURIComponent(query); // add 'leiter ' keyword
+    console.log(url);
 
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(response => response.json())

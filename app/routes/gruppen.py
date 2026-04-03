@@ -31,19 +31,27 @@ def gruppen():
     return render_template("gruppen.html", gruppen=gruppen)
 
 
-@gruppen_bp.route("/search_mitglied", methods=["GET"])
+@gruppen_bp.route("/search", methods=["GET"])
 @login_required
 @require_role(1)
-def search_mitglied():
+def search():
     search_query = request.args.get("query", "")
-
+    if "mitglied" in search_query:
+        search_in = "mitglieder"
+        search_query = search_query.replace("mitglied", "").strip()
+    else:
+        search_in = "gruppenleiter"
+        search_query = search_query.replace("leiter", "").strip()
     with get_kompass() as conn:
         cursor = conn.cursor()
-        cursor.execute(
-            """SELECT id, vorname, nachname FROM mitglieder WHERE vorname LIKE ? OR nachname LIKE ?""",
-            ("%" + search_query + "%", "%" + search_query + "%"),
-        )
-        search_results_mitglieder = cursor.fetchall()
+        query = f"""
+            SELECT id, vorname, nachname
+            FROM {search_in}
+            WHERE vorname LIKE ? OR nachname LIKE ?
+            """
+        cursor.execute(query, ("%" + search_query + "%", "%" + search_query + "%"))
+        search_results = cursor.fetchall()
+        print(search_results)
 
     return jsonify(
         {
@@ -53,35 +61,7 @@ def search_mitglied():
                     "vorname": row["vorname"],
                     "nachname": row["nachname"],
                 }
-                for row in search_results_mitglieder
-            ]
-        }
-    )
-
-
-@gruppen_bp.route("/search_gruppenleiter", methods=["GET"])
-@login_required
-@require_role(1)
-def search_gruppenleiter():
-    search_query = request.args.get("query", "")
-
-    with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """SELECT id, vorname, nachname FROM gruppenleiter WHERE vorname LIKE ? OR nachname LIKE ?""",
-            ("%" + search_query + "%", "%" + search_query + "%"),
-        )
-        search_results_gruppenleiter = cursor.fetchall()
-
-    return jsonify(
-        {
-            "results": [
-                {
-                    "id": row["id"],
-                    "vorname": row["vorname"],
-                    "nachname": row["nachname"],
-                }
-                for row in search_results_gruppenleiter
+                for row in search_results
             ]
         }
     )
