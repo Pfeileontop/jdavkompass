@@ -6,7 +6,7 @@
 <section class="page-section">
     <div class="cards">
         {% for gruppe in gruppen %}
-        <a class="card" href="{{ url_for('gruppen.gruppe', gruppe_id=gruppe.id) }}">
+        <a class="card" href="{{ url_for('gruppe.gruppe', gruppe_id=gruppe.id) }}">
             <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
 
             <div class="gruppe-info">

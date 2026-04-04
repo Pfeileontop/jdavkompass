@@ -11,71 +11,68 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    session.clear()
     if request.method == "GET":
         return render_template("login.html")
 
-    else:
-        username = request.form.get("username", "").strip().lower()
-        password = request.form.get("password", "")
+    username = request.form.get("username", "").strip().lower()
+    password = request.form.get("password", "")
+    error = None
 
-        with get_accounts() as conn:
-            row = conn.execute(
-                "SELECT id, password, role, status FROM accounts WHERE uname = ?",
-                (username,),
-            ).fetchone()
+    with get_accounts() as conn:
+        row = conn.execute(
+            "SELECT id, password, role, status FROM accounts WHERE uname = ?",
+            (username,),
+        ).fetchone()
 
-        error = None
-        session.clear()
+    if not row:
+        error = "Falsche Kombination aus Benutzernamen und Passwort."
+    elif row["status"] != "active":
+        error = "Dein Konto wartet noch auf eine Adminbestätigung"
+    elif not check_password_hash(row["password"], password):
+        error = "Falsche Kombination aus Benutzernamen und Passwort."
 
-        if not row:
-            error = "Falsche Kombination aus Benutzernamen und Passwort."
-        elif row["status"] != "active":
-            error = "Dein Konto wartet noch auf eine Adminbestätigung"
-        elif not check_password_hash(row["password"], password):
-            error = "Falsche Kombination aus Benutzernamen und Passwort."
+    if error:
+        return render_template("login.html", error=error)
 
-        if error:
-            return render_template("login.html", error=error)
+    user = User(row["id"], username, row["role"])
+    login_user(user)
 
-        user = User(row["id"], username, row["role"])
-        login_user(user)
-
-        return redirect("/")
+    return redirect("/")
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    session.clear()
     if request.method == "GET":
         return render_template("register.html")
 
-    else:
-        username = request.form.get("username", "").strip().lower()
-        password = request.form.get("password", "")
-        hashed_password = generate_password_hash(password)
+    username = request.form.get("username", "").strip().lower()
+    password = request.form.get("password", "")
 
-        session.clear()
+    if not username or not password:
+        return render_template(
+            "register.html", error="Bitte Benutzername und Passwort eingeben."
+        )
 
-        if not username or not password:
-            session.clear()
+    hashed_password = generate_password_hash(password)
+
+    with get_accounts() as conn:
+        existing = conn.execute(
+            "SELECT id FROM accounts WHERE uname = ?", (username,)
+        ).fetchone()
+
+        if existing:
             return render_template(
-                "register.html", error="Bitte Benutzername und Passwort eingeben."
+                "register.html", error="Benutzername existiert bereits."
             )
 
-        with get_accounts() as conn:
-            existing = conn.execute(
-                "SELECT id FROM accounts WHERE uname = ?", (username,)
-            ).fetchone()
+        conn.execute(
+            "INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?)",
+            (username, hashed_password, 1, "pending"),
+        )
 
-            if existing:
-                return render_template(
-                    "register.html", error="Benutzername existiert bereits."
-                )
-
-            conn.execute(
-                "INSERT INTO accounts (uname, password, role, status) VALUES (?, ?, ?, ?)",
-                (username, hashed_password, 1, "pending"),
-            )
-        return redirect("/")
+    return redirect("/")
 
 
 @auth_bp.route("/logout", methods=["GET", "POST"])

@@ -106,7 +106,7 @@
 
         {% if current_user.role >= 3 %}
         <form id="download-form"
-              action="{{ url_for('gruppen.download_attendance', gruppe_id=gruppe[0]) }}"
+              action="{{ url_for('gruppe.download_attendance', gruppe_id=gruppe[0]) }}"
               method="GET">
         </form>
         {% endif %}
@@ -127,14 +127,14 @@
 
         {% for mitglied in mitglieder %}
         <form id="remove-member-{{ mitglied[0] }}"
-              action="{{ url_for('gruppen.mitglied_entfernen', gruppe_id=gruppe[0], mitglied_id=mitglied[0]) }}"
+              action="{{ url_for('gruppe.mitglied_entfernen', gruppe_id=gruppe[0], mitglied_id=mitglied[0]) }}"
               method="POST">
         </form>
         {% endfor %}
 
         {% for gruppenleiter in gruppenleiter %}
         <form id="remove-leader-{{ gruppenleiter[0] }}"
-              action="{{ url_for('gruppen.gruppenleiter_entfernen', gruppe_id=gruppe[0], gruppenleiter_id=gruppenleiter[0]) }}"
+              action="{{ url_for('gruppe.gruppenleiter_entfernen', gruppe_id=gruppe[0], gruppenleiter_id=gruppenleiter[0]) }}"
               method="POST">
         </form>
         {% endfor %}
@@ -233,7 +233,7 @@ function searchGruppenleiter() {
 }
 
 function addMitglied(id) {
-    fetch(`/gruppen/${gruppeId}/mitglied/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    fetch(`/gruppe/${gruppeId}/mitglied/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
     .then(() => { window.location.reload(); });
 }
 

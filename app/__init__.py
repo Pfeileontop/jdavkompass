@@ -14,6 +14,7 @@ from app.models import User, get_accounts, init_db
 from .routes.admin import admin_bp
 from .routes.auth import auth_bp
 from .routes.gruppen import gruppen_bp
+from .routes.gruppe import gruppe_bp
 from .routes.index import index_bp
 from .routes.mitglieder import mitglieder_bp
 from .routes.profile import profile_bp
@@ -172,6 +173,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(gruppen_bp)
+    app.register_blueprint(gruppe_bp)
     app.register_blueprint(mitglieder_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(index_bp)

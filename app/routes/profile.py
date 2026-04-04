@@ -8,12 +8,16 @@ from app.routes.auth import require_role
 profile_bp = Blueprint("profile", __name__)
 
 
+def update_password(conn, user_id, new_password):
+    hashed = generate_password_hash(new_password)
+    conn.execute("UPDATE accounts SET password = ? WHERE id = ?", (hashed, user_id))
+
+
 @profile_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 @require_role(1)
 def profile():
-    error = None
-    success = None
+    error = success = None
 
     with get_accounts() as conn:
         user = conn.execute(
@@ -30,11 +34,7 @@ def profile():
             elif new_password != confirm_password:
                 error = "Die neuen Passwörter stimmen nicht überein."
             else:
-                hashed = generate_password_hash(new_password)
-                conn.execute(
-                    "UPDATE accounts SET password = ? WHERE id = ?",
-                    (hashed, user["id"]),
-                )
+                update_password(conn, user["id"], new_password)
                 success = "Passwort erfolgreich geändert."
 
     return render_template("profile.html", user=user, error=error, success=success)
