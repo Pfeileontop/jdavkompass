@@ -20,18 +20,28 @@ from .routes.mitglieder import mitglieder_bp
 from .routes.profile import profile_bp
 
 login_manager = LoginManager()
+# login route auf die nicht eingelogte Nutzer weitergeleitet werden
 login_manager.login_view = "auth.login"
+# Laedt den Secret Key aus .env
 load_dotenv()
 
 
 def create_app():
+    """Erstellt die Flask App
+
+    Returns:
+        Flask: Flask App
+    """
+
+    # initialisiert die Datenbank
     init_db()
+
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")  # Secret Key aus .env
     app.config.update(
-        SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SECURE=True,
-        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_HTTPONLY=True,  # Session Cookie kann nicht von Java Script ausgelesen werden
+        SESSION_COOKIE_SECURE=True,  # Nur https
+        SESSION_COOKIE_SAMESITE="Lax",  # anti cross site request forgery
         REMEMBER_COOKIE_HTTPONLY=True,
         REMEMBER_COOKIE_SECURE=True,
         PERMANENT_SESSION_LIFETIME=timedelta(hours=72),
@@ -45,7 +55,7 @@ def create_app():
     class JSONFormatter(logging.Formatter):
         def format(self, record):
             log_record = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now().isoformat(),
                 "level": record.levelname,
                 "message": record.getMessage(),
             }
@@ -55,6 +65,7 @@ def create_app():
                 log_record["exception"] = self.formatException(record.exc_info)
             return json.dumps(log_record)
 
+    # Rotating File Handler für Logdateien (max 5MB pro Datei, 5 Backups)
     file_handler = RotatingFileHandler(
         "logs/app.log", maxBytes=5 * 1024 * 1024, backupCount=5
     )
