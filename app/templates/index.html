@@ -12,11 +12,11 @@
     <div class="cards">
         {% if heutige_gruppen %}
             {% for gruppe in heutige_gruppen %}
-            <a class="card" href="{{ url_for('gruppen.gruppe', gruppe_id=gruppe.id) }}">
+            <a class="card" href="{{ url_for('gruppe.gruppe', gruppe_id=gruppe.id) }}">
                 <h2 class="gruppe-titel">{{ gruppe.name }}</h2>
                 <div class="gruppe-info">
                     <div class="info-item">
-                        <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} – {{ gruppe.endzeit }}
+                        <strong>Uhrzeit:</strong> {{ gruppe.startzeit }} - {{ gruppe.endzeit }}
                     </div>
                     {% if gruppe.gruppenleiter %}
                     <div class="info-item">

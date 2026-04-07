@@ -31,127 +31,39 @@ def gruppe(gruppe_id):
 
     today = datetime.datetime.today()
     today_name = heute()
-
-    anwesenheitheute = {}
-    anwesenheitshistorie = {}
-    gruppenleiter_anwesenheitheute = {}
-    gruppenleiter_anwesenheithistorie = {}
-    alle_daten = set()
     total_age = 0
 
     gruppe = get_gruppe(gruppe_id)
     mitglieder = get_mitglieder(gruppe_id)
     gruppenleiter = get_gruppenleiter(gruppe_id)
 
-
-    with get_kompass() as conn:
-        cursor = conn.cursor()
-        if gruppe["wochentag"] == today_name:
-            cursor.execute(
-                """
-                SELECT mitglied_id, anwesend FROM anwesenheit WHERE gruppe_id = ? AND datum = ?
-            """,
-                (gruppe_id, today.date()),
-            )
-            anwesenheitheute = {
-                row["mitglied_id"]: bool(row["anwesend"]) for row in cursor.fetchall()
-            }
-
-            cursor.execute(
-                """
-                SELECT gruppenleiter_id, anwesend FROM anwesenheit_leiter WHERE gruppe_id = ? AND datum = ?
-            """,
-                (gruppe_id, today.date()),
-            )
-            gruppenleiter_anwesenheitheute = {
-                row["gruppenleiter_id"]: bool(row["anwesend"])
-                for row in cursor.fetchall()
-            }
-
-
-
-
-        cursor.execute(
-            """
-            SELECT mitglied_id, datum, anwesend FROM anwesenheit
-            WHERE gruppe_id = ?
-            ORDER BY datum
-        """,
-            (gruppe_id,),
+    if gruppe["wochentag"] == today_name:
+        anwesenheitheute = get_anwesenheit_heute(gruppe_id, "mitglied", today)
+        gruppenleiter_anwesenheitheute = get_anwesenheit_heute(
+            gruppe_id, "gruppenleiter", today
         )
-        for row in cursor.fetchall():
-            mitglied_id, datum, anwesend = (
-                row["mitglied_id"],
-                row["datum"],
-                row["anwesend"],
-            )
-            alle_daten.add(datum)
-            if mitglied_id not in anwesenheitshistorie:
-                anwesenheitshistorie[mitglied_id] = {}
-            anwesenheitshistorie[mitglied_id][datum] = anwesend
 
-        cursor.execute(
-            """
-            SELECT gruppenleiter_id, datum, anwesend FROM anwesenheit_leiter
-            WHERE gruppe_id = ?
-            ORDER BY datum
-        """,
-            (gruppe_id,),
-        )
-        for row in cursor.fetchall():
-            gl_id, datum, anwesend = (
-                row["gruppenleiter_id"],
-                row["datum"],
-                row["anwesend"],
-            )
-            alle_daten.add(datum)
-            if gl_id not in gruppenleiter_anwesenheithistorie:
-                gruppenleiter_anwesenheithistorie[gl_id] = {}
-            gruppenleiter_anwesenheithistorie[gl_id][datum] = anwesend
-
-
-
-
+    alle_daten_mitglieder, anwesenheitshistorie = get_anwesenheit(gruppe_id, "mitglied")
+    alle_daten_gruppenleiter, gruppenleiter_anwesenheithistorie = get_anwesenheit(
+        gruppe_id, "gruppenleiter"
+    )
+    alle_daten = list(dict.fromkeys(alle_daten_mitglieder + alle_daten_gruppenleiter))
 
     for mitglied in mitglieder:
         geburtsdatum = datetime.datetime.strptime(mitglied["geburtsdatum"], "%Y-%m-%d")
-        total_age += (today.year - geburtsdatum.year)
+        total_age += today.year - geburtsdatum.year
     avg_age = int(total_age / len(mitglieder)) if len(mitglieder) > 0 else 0
-
-
-
 
     if request.method == "POST":
         if current_user.role < 2:
             abort(403)
-
         if gruppe["wochentag"] != today_name:
             abort(403)
 
-        for mitglied in mitglieder:
-            anwesend = request.form.get(f"mitglied_{mitglied['id']}") == "on"
-            with get_kompass() as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    """
-                    INSERT OR REPLACE INTO anwesenheit (mitglied_id, gruppe_id, datum, anwesend)
-                    VALUES (?, ?, ?, ?)
-                """,
-                    (mitglied["id"], gruppe_id, today.date(), anwesend),
-                )
-        for gl in gruppenleiter:
-            anwesend = request.form.get(f"gruppenleiter_{gl['id']}") == "on"
-            with get_kompass() as conn:
-                cursor.execute(
-                    """
-                    INSERT OR REPLACE INTO anwesenheit_leiter (gruppenleiter_id, gruppe_id, datum, anwesend)
-                    VALUES (?, ?, ?, ?)
-                """,
-                    (gl["id"], gruppe_id, today.date(), anwesend),
-                )
+        update_anwesenheit(gruppe_id, "mitglied", mitglieder, request, today)
+        update_anwesenheit(gruppe_id, "gruppenleiter", gruppenleiter, request, today)
 
-
-
+        return redirect(url_for("gruppe.gruppe", gruppe_id=gruppe_id))
 
     return render_template(
         "gruppe.html",
@@ -203,7 +115,9 @@ def mitglied_zu_gruppe(gruppe_id, mitglied_id):
     return redirect(url_for("gruppe.gruppe", gruppe_id=gruppe_id))
 
 
-@gruppe_bp.route("/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"])
+@gruppe_bp.route(
+    "/gruppenleiter_zu_gruppe/<int:gruppe_id>/<int:gruppenleiter_id>", methods=["POST"]
+)
 @login_required
 @require_role(2)
 def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
@@ -212,7 +126,9 @@ def gruppenleiter_zu_gruppe(gruppe_id, gruppenleiter_id):
     return redirect(url_for("gruppe.gruppe", gruppe_id=gruppe_id))
 
 
-@gruppe_bp.route("/gruppe/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"])
+@gruppe_bp.route(
+    "/gruppe/<int:gruppe_id>/mitglied/<int:mitglied_id>/entfernen", methods=["POST"]
+)
 @login_required
 @require_role(3)
 def mitglied_entfernen(gruppe_id, mitglied_id):
@@ -221,7 +137,10 @@ def mitglied_entfernen(gruppe_id, mitglied_id):
     return redirect(url_for("gruppe.gruppe", gruppe_id=gruppe_id))
 
 
-@gruppe_bp.route("/gruppe/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen", methods=["POST"],)
+@gruppe_bp.route(
+    "/gruppe/<int:gruppe_id>/gruppenleiter/<int:gruppenleiter_id>/entfernen",
+    methods=["POST"],
+)
 @login_required
 @require_role(3)
 def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
@@ -239,22 +158,34 @@ def download_attendance(gruppe_id):
 
         cursor.execute(
             """
-            SELECT vorname, nachname, datum, anwesend 
-            FROM anwesenheit 
-            JOIN mitglieder m ON mitglied_id = m.id 
-            WHERE gruppe_id = ?
-        """,
+            SELECT
+                vorname,
+                nachname,
+                datum,
+                anwesend
+            FROM
+                anwesenheit
+                JOIN mitglieder m ON mitglied_id = m.id
+            WHERE
+                gruppe_id = ?
+            """,
             (gruppe_id,),
         )
         anwesenheit_mitglieder = cursor.fetchall()
 
         cursor.execute(
             """
-            SELECT vorname, nachname, datum, anwesend 
-            FROM anwesenheit_leiter 
-            JOIN gruppenleiter gl ON gruppenleiter_id = gl.id 
-            WHERE gruppe_id = ?
-        """,
+            SELECT
+                vorname,
+                nachname,
+                datum,
+                anwesend
+            FROM
+                anwesenheit_leiter
+                JOIN gruppenleiter gl ON gruppenleiter_id = gl.id
+            WHERE
+                gruppe_id = ?
+            """,
             (gruppe_id,),
         )
         anwesenheit_gruppenleiter = cursor.fetchall()
