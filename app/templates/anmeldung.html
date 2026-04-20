@@ -74,16 +74,16 @@
         <label>
             Im unteren Feld kann eine Unterschrift endweder per Maus oder per Finger gegeben werden.
         </label>
-        <details class="consent-box">
-        <summary>Mit einer Unterschrift simme ich den folgendem zu:</summary>
-        <div class="consent-text">
-            Ich bestätige die Richtigkeit meiner Angaben. Ich bin damit einverstanden, dass während Gruppenaktivitäen Bild und Videomaterial von Gruppenleitenden
-            aufgenommen und für die Medien der JDAV Hildesheim verwendet werden dürfen. Für die Person die ich anmelde
-            existiert eine Mitgliedschaft im DAV. Ich bin damit einverstanden, dass meine Daten digital intern verarbeitet
-            werden und zum Zwecke der Gruppenorganisation gespeichert werden. Ich bin mit den Kosten der Teilname einverstanden.
-            Ich bin für Person, die ich anmelde erziehugsberechtigt.
-        </div>
-        </details>
+        <label>
+            <input type="checkbox" name="datenschutz_bestaetigt" required>Ich habe die <a href="">Datenschutzerklärung</a> gelesen und bin mit der digitalen Datenvereinbarung einverstanden 
+        </label>
+        <label>
+            <input type="checkbox" name="bilder_bestaetigt">Während der Jugendgruppe dürfen von der teilnehmenden Personen Bild und Videomaterial aufgenommen werden und auf den Vereinsmedien der JDAV (Vereinszeitschrift, Socialmedia) veröffentlicht werden.
+        </label>
+        <label>
+            <input type="checkbox" name="datenschutz_bestaetigt" required>Ich bestätige die Richtigkeit meiner Angaben 
+        </label>
+        <label>Mit einer digitalen Unterschrift und dem Anmelden einer teilnehmenden Person bestätige ich die Auswahl der folgenden Optionen</label>
         <canvas id="signature-pad" style="border: 1px solid #ccc;"></canvas><br>
         <button type="button" onclick="clearSignature()">Unterschrift löschen</button>
         <input type="hidden" name="unterschrift" id="unterschrift">

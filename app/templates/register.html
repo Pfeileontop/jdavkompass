@@ -8,15 +8,22 @@
 
     <form method="POST" action="/register">
         <input type="text" name="username" placeholder="Benutzername" required minlength="3">
-        <input 
-            type="password" 
-            name="password" 
-            placeholder="Passwort" 
-            required 
-            minlength="8" 
-            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+" 
-            title="Mindestens 8 Zeichen: Großbuchstaben, Kleinbuchstaben und Zahlen"
-        >
+        <div class="password-container">
+            <input 
+                type="password" 
+                name="password" 
+                placeholder="Passwort" 
+                id="password"
+                required 
+                minlength="8" 
+                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+" 
+                title="Mindestens 8 Zeichen: Großbuchstaben, Kleinbuchstaben und Zahlen"
+            >
+            <img id="toggleIcon"
+                src="{{ url_for('static', filename='img/pass_hidden.png') }}"
+                class="toggle-password"
+                onclick="togglePassword()">
+        </div>
         <button type="submit">Registrieren</button>
     </form>
 
@@ -26,4 +33,19 @@
 
     <p>Bereits registriert? <a href="/login">Login</a></p>
 </div>
+
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        icon.src = "{{ url_for('static', filename='img/pass_shown.png') }}";
+    } else {
+        passwordField.type = "password";
+        icon.src = "{{ url_for('static', filename='img/pass_hidden.png') }}";
+    }
+}
+</script>
 {% endblock %}

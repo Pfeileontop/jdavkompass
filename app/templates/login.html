@@ -7,7 +7,13 @@
     <h2>Login</h2>
     <form method="POST" action="/login">
         <input type="text" name="username" placeholder="Benutzername" required>
-        <input type="password" name="password" placeholder="Passwort" required>
+        <div class="password-container">
+            <input type="password" name="password" placeholder="Passwort" id="password" required>
+            <img id="toggleIcon"
+            src="{{ url_for('static', filename='img/pass_hidden.png') }}"
+            class="toggle-password"
+            onclick="togglePassword()">
+        </div>
         <button type="submit">Login</button>
     </form>
 
@@ -17,4 +23,19 @@
 
     <p>Noch keinen Account? <a href="/register">Registrieren</a></p>
 </div>
+
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        icon.src = "{{ url_for('static', filename='img/pass_shown.png') }}";
+    } else {
+        passwordField.type = "password";
+        icon.src = "{{ url_for('static', filename='img/pass_hidden.png') }}";
+    }
+}
+</script>
 {% endblock %}
