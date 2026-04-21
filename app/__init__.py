@@ -25,6 +25,8 @@ login_manager.login_view = "auth.login"
 # Laedt den Secret Key aus .env
 load_dotenv()
 
+from extensions import limiter
+
 
 def create_app():
     """Erstellt die Flask App
@@ -47,6 +49,7 @@ def create_app():
         PERMANENT_SESSION_LIFETIME=timedelta(hours=72),
     )
 
+    limiter.init_app(app)
     login_manager.init_app(app)
 
     if not os.path.exists("logs"):

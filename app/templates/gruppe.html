@@ -5,7 +5,7 @@
 <section class="page-section">
     <h1>{{ gruppe[1] }}</h1>
     <p>Gruppenalter {{ avg_age }} Jahre</p>
-    <p>{{ gruppe['wochentag'] }} {{ gruppe.startzeit }} - {{ gruppe.endzeit }}</p>
+    <p>{{ gruppe.wochentag }} {{ gruppe.startzeit }} - {{ gruppe.endzeit }}</p>
 
     <div class="table-container anwesenheitsliste">
         <h3>Anwesenheitsliste</h3>
@@ -15,11 +15,14 @@
                     <tr>
                         <th>Name</th>
                         {% for datum in alle_daten %}
-                        <th class="historie">{{ datum[8:10] }}.{{ datum[5:7] }}.{{ datum[0:4] }}</th>
+                        <th class="historie {% if datum == today %}today-col{% else %}other-col{% endif %}">
+                            {% if datum == today %}
+                                Heute
+                            {% else %}
+                                {{ datum[8:10] }}.{{ datum[5:7] }}.{{ datum[0:4] }}
+                            {% endif %}
+                        </th>
                         {% endfor %}
-                        {% if today_name == gruppe['wochentag'] and current_user.role >= 2%}
-                        <th>Heute?</th>
-                        {% endif %}
                         <th>Notfallkontakt</th>
                         {% if current_user.role >= 3 %}
                         <th>Aktion</th>
@@ -29,38 +32,29 @@
                 <tbody>
                     {% for mitglied in mitglieder %}
                     <tr>
-                        <td>{{ mitglied[1] }} {{ mitglied[2] }}</td>
+                        <td>{{ mitglied.vorname }} {{ mitglied.nachname }}</td>
+
                         {% for datum in alle_daten %}
-                        <td class="historie">
-                            {% if anwesenheitshistorie.get(mitglied[0], {}).get(datum) %}
-                            ✅
-                            {% else %}
-                            -
-                            {% endif %}
+                        <td class="historie {% if datum == today %}today-col{% else %}other-col{% endif %}">
+                            <input type="checkbox"
+                                name="mitglied_{{ mitglied.id }}_{{ datum }}"
+                                {% if anwesenheit.get(mitglied.id, {}).get(datum) %}checked{% endif %}>
                         </td>
                         {% endfor %}
 
-                        {% if today_name == gruppe['wochentag'] and current_user.role >= 2 %}
                         <td>
-                            <input type="checkbox"
-                                   name="mitglied_{{ mitglied[0] }}"
-                                   {% if anwesenheitheute.get(mitglied[0]) %}checked{% endif %}>
-                        </td>
-                        {% endif %}
-
-                        <td>
-                            {% if mitglied[4] %}
-                            {{ mitglied[4] }}
+                            {% if mitglied.telefon %}
+                                {{ mitglied.telefon }}
                             {% else %}
-                            kein Notfallkontakt!
-                            {% endif %}
+                                kein Notfallkontakt!
+                                {% endif %}
                         </td>
 
                         {% if current_user.role >= 3 %}
                         <td>
                             <button class="btn-remove" type="submit"
-                                    form="remove-member-{{ mitglied[0] }}">
-                                aus Gruppe entfernen
+                            form="remove-member-{{ mitglied.id }}">
+                            aus Gruppe entfernen
                             </button>
                         </td>
                         {% endif %}
@@ -69,31 +63,27 @@
 
                     {% for gruppenleiter in gruppenleiter %}
                     <tr class="gruppenleiter">
-                        <td>{{ gruppenleiter[1] }} {{ gruppenleiter[2] }}</td>
+                        <td>{{ gruppenleiter.vorname }} {{ gruppenleiter.nachname }}</td>
                         {% for datum in alle_daten %}
-                        <td class="historie">
-                            {% if gruppenleiter_anwesenheithistorie.get(gruppenleiter[0], {}).get(datum) %}
-                            ✅
-                            {% else %}
-                            -
-                            {% endif %}
+                        <td class="historie {% if datum == today %}today-col{% else %}other-col{% endif %}">
+                            <input type="checkbox"
+                                name="gruppenleiter_{{ gruppenleiter.id }}_{{ datum }}"
+                                {% if gruppenleiter_anwesenheit.get(gruppenleiter.id, {}).get(datum) %}checked{% endif %}>
                         </td>
                         {% endfor %}
 
-                        {% if today_name == gruppe['wochentag'] and current_user.role >= 2 %}
                         <td>
-                            <input type="checkbox"
-                                   name="gruppenleiter_{{ gruppenleiter[0] }}"
-                                   {% if gruppenleiter_anwesenheitheute.get(gruppenleiter[0]) %}checked{% endif %}>
+                            {% if gruppenleiter.telefon %}
+                            {{ gruppenleiter.telefon }}
+                            {% else %}
+                            kein Notfallkontakt!
+                            {% endif %}
                         </td>
-                        {% endif %}
-
-                        <td></td>
 
                         {% if current_user.role >= 3 %}
                         <td>
                             <button class="btn-remove" type="submit"
-                                    form="remove-leader-{{ gruppenleiter[0] }}">
+                                    form="remove-leader-{{ gruppenleiter.id }}">
                                 aus Gruppe entfernen
                             </button>
                         </td>
@@ -106,17 +96,15 @@
 
         {% if current_user.role >= 2 %}
         <form id="download-form"
-              action="{{ url_for('gruppe.download_attendance', gruppe_id=gruppe[0]) }}"
+              action="{{ url_for('gruppe.download_attendance', gruppe_id=gruppe.id) }}"
               method="GET">
         </form>
         {% endif %}
 
         <div class="btn-wrapper-anwesenheit">
-            {% if today_name == gruppe['wochentag'] %}
             <button type="submit" class="btn-submit" form="attendance-form">
                 Speichern
             </button>
-            {% endif %}
 
             {% if current_user.role >= 2 %}
             <button type="submit" class="btn-submit" form="download-form">
@@ -126,15 +114,15 @@
         </div>
 
         {% for mitglied in mitglieder %}
-        <form id="remove-member-{{ mitglied[0] }}"
-              action="{{ url_for('gruppe.mitglied_entfernen', gruppe_id=gruppe[0], mitglied_id=mitglied[0]) }}"
+        <form id="remove-member-{{ mitglied.id }}"
+              action="{{ url_for('gruppe.mitglied_entfernen', gruppe_id=gruppe.id, mitglied_id=mitglied.id) }}"
               method="POST">
         </form>
         {% endfor %}
 
         {% for gruppenleiter in gruppenleiter %}
-        <form id="remove-leader-{{ gruppenleiter[0] }}"
-              action="{{ url_for('gruppe.gruppenleiter_entfernen', gruppe_id=gruppe[0], gruppenleiter_id=gruppenleiter[0]) }}"
+        <form id="remove-leader-{{ gruppenleiter.id }}"
+              action="{{ url_for('gruppe.gruppenleiter_entfernen', gruppe_id=gruppe.id, gruppenleiter_id=gruppenleiter.id) }}"
               method="POST">
         </form>
         {% endfor %}
@@ -160,7 +148,7 @@
         {% endif %}
 
         {% if current_user.role >= 3 %}
-        <form action="{{ url_for('gruppen.gruppe_loeschen', gruppe_id=gruppe[0]) }}"
+        <form action="{{ url_for('gruppen.gruppe_loeschen', gruppe_id=gruppe.id) }}"
               method="POST"
               onsubmit="return confirm('Gruppe wirklich löschen?');">
             <button type="submit" class="btn-delete">Gruppe löschen</button>
@@ -170,7 +158,7 @@
 </section>
 
 <script>
-const gruppeId = {{ gruppe[0] }};
+const gruppeId = {{ gruppe.id }};
 
 function searchMitglied() {
     var query = document.getElementById("search_mitglied").value;

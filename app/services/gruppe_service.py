@@ -139,7 +139,8 @@ def get_gruppenleiter(gruppe_id):
             SELECT
                 g.id,
                 g.vorname,
-                g.nachname
+                g.nachname,
+                g.telefon
             FROM
                 gruppenleiter g
                 JOIN gruppenleiter_jugendgruppen gj ON g.id = gj.gruppenleiter_id
@@ -161,33 +162,6 @@ def get_query_vars(person_typ):
         table = "anwesenheit"
         query_id = "mitglied_id"
     return table, query_id
-
-
-def get_anwesenheit_heute(gruppe_id, person_typ, today):
-    table, query_id = get_query_vars(person_typ)
-
-    query = f"""
-            SELECT
-                {query_id},
-                anwesend
-            FROM
-                {table}
-            WHERE
-                gruppe_id = ?
-                AND datum = ?
-            """
-
-    with get_kompass() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            query,
-            (gruppe_id, today.date()),
-        )
-        anwesenheitheute = {
-            row[query_id]: bool(row["anwesend"]) for row in cursor.fetchall()
-        }
-
-    return anwesenheitheute
 
 
 def get_anwesenheit(gruppe_id, person_typ):
@@ -227,7 +201,7 @@ def get_anwesenheit(gruppe_id, person_typ):
     return alle_daten, anwesenheitshistorie
 
 
-def update_anwesenheit(gruppe_id, person_typ, person_list, request, today):
+def update_anwesenheit(gruppe_id, person_typ, person_list, request, daten):
     table, query_id = get_query_vars(person_typ)
 
     query = f"""
@@ -240,5 +214,37 @@ def update_anwesenheit(gruppe_id, person_typ, person_list, request, today):
         cursor = conn.cursor()
 
         for person in person_list:
-            anwesend = request.form.get(f"{person_typ}_{person['id']}") == "on"
-            cursor.execute(query, (person["id"], gruppe_id, today.date(), anwesend))
+            for datum in daten:
+                field = f"{person_typ}_{person['id']}_{datum}"
+                anwesend = field in request.form
+                cursor.execute(query, (person["id"], gruppe_id, datum, anwesend))
+
+def new_day(gruppe_id, datum):
+    with get_kompass() as conn:
+        cursor = conn.cursor()
+        mitglieder = get_mitglieder(gruppe_id=gruppe_id)
+        gruppenleiter = get_gruppenleiter(gruppe_id=gruppe_id)
+
+        for mitglied in mitglieder:
+            cursor.execute(
+                """
+                INSERT OR IGNORE
+                INTO 
+                    anwesenheit
+                    (mitglied_id, gruppe_id, datum, anwesend)
+                VALUES 
+                    (?, ?, ?, 0)
+                """, 
+                (mitglied["id"], gruppe_id, datum))
+
+        for leiter in gruppenleiter:
+            cursor.execute(
+                """
+                INSERT OR IGNORE
+                INTO 
+                    anwesenheit_leiter
+                    (gruppenleiter_id, gruppe_id, datum, anwesend)
+                VALUES 
+                    (?, ?, ?, 0)
+                """, 
+                (leiter["id"], gruppe_id, datum))

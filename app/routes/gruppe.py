@@ -28,28 +28,29 @@ gruppe_bp = Blueprint("gruppe", __name__)
 @require_role(1)
 @login_required
 def gruppe(gruppe_id):
-
-    today = datetime.datetime.today()
+    today = datetime.date.today()
     today_name = heute()
     total_age = 0
 
     gruppe = get_gruppe(gruppe_id)
     mitglieder = get_mitglieder(gruppe_id)
     gruppenleiter = get_gruppenleiter(gruppe_id)
-    anwesenheitheute = None
-    gruppenleiter_anwesenheitheute = None
 
-    if gruppe["wochentag"] == today_name:
-        anwesenheitheute = get_anwesenheit_heute(gruppe_id, "mitglied", today)
-        gruppenleiter_anwesenheitheute = get_anwesenheit_heute(
-            gruppe_id, "gruppenleiter", today
-        )
-
-    alle_daten_mitglieder, anwesenheitshistorie = get_anwesenheit(gruppe_id, "mitglied")
-    alle_daten_gruppenleiter, gruppenleiter_anwesenheithistorie = get_anwesenheit(
+    alle_daten_mitglieder, anwesenheit = get_anwesenheit(gruppe_id, "mitglied")
+    alle_daten_gruppenleiter, gruppenleiter_anwesenheit = get_anwesenheit(
         gruppe_id, "gruppenleiter"
     )
     alle_daten = list(dict.fromkeys(alle_daten_mitglieder + alle_daten_gruppenleiter))
+
+    if today_name == gruppe["wochentag"] and str(today) not in alle_daten:
+        new_day(gruppe_id=gruppe_id, datum=today)
+
+        alle_daten_mitglieder, anwesenheit = get_anwesenheit(gruppe_id, "mitglied")
+        alle_daten_gruppenleiter, gruppenleiter_anwesenheit = get_anwesenheit(
+            gruppe_id, "gruppenleiter"
+        )
+        alle_daten = list(dict.fromkeys(alle_daten_mitglieder + alle_daten_gruppenleiter))
+
 
     for mitglied in mitglieder:
         geburtsdatum = datetime.datetime.strptime(mitglied["geburtsdatum"], "%Y-%m-%d")
@@ -59,25 +60,22 @@ def gruppe(gruppe_id):
     if request.method == "POST":
         if current_user.role < 2:
             abort(403)
-        if gruppe["wochentag"] != today_name:
-            abort(403)
 
-        update_anwesenheit(gruppe_id, "mitglied", mitglieder, request, today)
-        update_anwesenheit(gruppe_id, "gruppenleiter", gruppenleiter, request, today)
+        update_anwesenheit(gruppe_id, "mitglied", mitglieder, request, alle_daten)
+        update_anwesenheit(gruppe_id, "gruppenleiter", gruppenleiter, request, alle_daten)
 
         return redirect(url_for("gruppe.gruppe", gruppe_id=gruppe_id))
-
+    
     return render_template(
         "gruppe.html",
         today_name=today_name,
+        today=str(today),
         gruppe=gruppe,
         mitglieder=mitglieder,
-        anwesenheitheute=anwesenheitheute,
-        anwesenheitshistorie=anwesenheitshistorie,
+        anwesenheit=anwesenheit,
         alle_daten=sorted(alle_daten),
         gruppenleiter=gruppenleiter,
-        gruppenleiter_anwesenheitheute=gruppenleiter_anwesenheitheute,
-        gruppenleiter_anwesenheithistorie=gruppenleiter_anwesenheithistorie,
+        gruppenleiter_anwesenheit=gruppenleiter_anwesenheit,
         avg_age=avg_age,
     )
 

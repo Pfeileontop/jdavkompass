@@ -481,3 +481,11 @@ input[type="checkbox"] {
         padding: 1.88rem 1.25rem 1.88rem 1.25rem;
     }
 }
+
+
+@media (max-width: 500px) {
+    .anwesenheitsliste th.other-col,
+    .anwesenheitsliste td.other-col {
+        display: none;
+    }
+}

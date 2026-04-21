@@ -6,10 +6,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.models import User, get_accounts
 
+from extensions import limiter
+
 auth_bp = Blueprint("auth", __name__)
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("12 per minute")
 def login():
     session.clear()
     if request.method == "GET":
@@ -42,6 +45,7 @@ def login():
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
+@limiter.limit("12 per minute")
 def register():
     session.clear()
     if request.method == "GET":

@@ -144,7 +144,7 @@ def init_db():
             mitgliedschaft BOOLEAN not NULL,
             beitraege BOOLEAN not NULL,
             datenschutz BOOLEAN not NULL,
-            bilder BOOLEAN not NULL,
+            bilder BOOLEAN,
             richtigkeit BOOLEAN not NULL,
             FOREIGN KEY (adresse_id) REFERENCES adressen_unapproved(id)
         );
