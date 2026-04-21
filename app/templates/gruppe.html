@@ -17,7 +17,7 @@
                         {% for datum in alle_daten %}
                         <th class="historie">{{ datum[8:10] }}.{{ datum[5:7] }}.{{ datum[0:4] }}</th>
                         {% endfor %}
-                        {% if today_name == gruppe['wochentag'] and current_user.role >= 3%}
+                        {% if today_name == gruppe['wochentag'] and current_user.role >= 2%}
                         <th>Heute?</th>
                         {% endif %}
                         <th>Notfallkontakt</th>
@@ -40,7 +40,7 @@
                         </td>
                         {% endfor %}
 
-                        {% if today_name == gruppe['wochentag'] and current_user.role >= 3 %}
+                        {% if today_name == gruppe['wochentag'] and current_user.role >= 2 %}
                         <td>
                             <input type="checkbox"
                                    name="mitglied_{{ mitglied[0] }}"
@@ -80,7 +80,7 @@
                         </td>
                         {% endfor %}
 
-                        {% if today_name == gruppe['wochentag'] and current_user.role >= 3 %}
+                        {% if today_name == gruppe['wochentag'] and current_user.role >= 2 %}
                         <td>
                             <input type="checkbox"
                                    name="gruppenleiter_{{ gruppenleiter[0] }}"
@@ -104,7 +104,7 @@
             </table>
         </form>
 
-        {% if current_user.role >= 3 %}
+        {% if current_user.role >= 2 %}
         <form id="download-form"
               action="{{ url_for('gruppe.download_attendance', gruppe_id=gruppe[0]) }}"
               method="GET">
@@ -118,7 +118,7 @@
             </button>
             {% endif %}
 
-            {% if current_user.role >= 3 %}
+            {% if current_user.role >= 2 %}
             <button type="submit" class="btn-submit" form="download-form">
                 Download Anwesenheitsliste
             </button>
@@ -141,7 +141,7 @@
     </div>
 
     <div class="gruppe-actions">
-        {% if current_user.role >= 3 %}
+        {% if current_user.role >= 2 %}
         <div class="action-item">
             <h3>Mitglied hinzufügen</h3>
             <input type="text" id="search_mitglied" placeholder="Mitglied suchen..."

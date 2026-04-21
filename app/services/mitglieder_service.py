@@ -19,6 +19,9 @@ def get_unapproved_mitglieder_daten():
                 m.unterschrift,
                 m.mitgliedschaft,
                 m.beitraege,
+                m.datenschutz,
+                m.bilder,
+                m.richtigkeit,
                 a.strasse,
                 a.hausnummer,
                 a.plz,
@@ -123,6 +126,9 @@ def add_mitglied_to_unapproved(anmeldung_form_data):
     eb_telefon = anmeldung_form_data.get("eb_telefon")
     mitgliedschaft = anmeldung_form_data.get("mitgliedschaft_bestaetigt")
     beitraege = anmeldung_form_data.get("beitraege_bestaetigt")
+    datenschutz = anmeldung_form_data.get("datenschutz_bestaetigt")
+    bilder = anmeldung_form_data.get("bilder_bestaetigt")
+    richtigkeit = anmeldung_form_data.get("richtigkeit_bestaetigt")
     unterschrift = anmeldung_form_data.get("unterschrift")
 
     with get_kompass() as conn:
@@ -159,10 +165,13 @@ def add_mitglied_to_unapproved(anmeldung_form_data):
                     adresse_id,
                     unterschrift,
                     mitgliedschaft,
-                    beitraege
+                    beitraege,
+                    datenschutz,
+                    bilder,
+                    richtigkeit
                 )
             VALUES
-                (?, ?, ?, ?, ?, ?, ?, ?)
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 mitglied_vorname,
@@ -173,6 +182,9 @@ def add_mitglied_to_unapproved(anmeldung_form_data):
                 unterschrift,
                 mitgliedschaft,
                 beitraege,
+                datenschutz,
+                bilder,
+                richtigkeit,
             ),
         )
         mitglied_id = cursor.lastrowid
@@ -230,6 +242,7 @@ def approve_unapproved(mitglied_id):
                     geburtsdatum,
                     geschlecht,
                     adresse_id,
+                    bilder,
                     unterschrift
                 )
             SELECT
@@ -238,6 +251,7 @@ def approve_unapproved(mitglied_id):
                 geburtsdatum,
                 geschlecht,
                 ?,
+                bilder,
                 unterschrift
             FROM
                 mitglieder_unapproved

@@ -15,6 +15,7 @@ def init_db():
             geburtsdatum DATE not NULL,
             geschlecht TEXT,
             adresse_id INTEGER,
+            bilder BOOLEAN,
             unterschrift TEXT,
             mitgliedsnummer TEXT,
             FOREIGN KEY (adresse_id) REFERENCES adressen(id)
@@ -142,6 +143,9 @@ def init_db():
             unterschrift TEXT not NULL,
             mitgliedschaft BOOLEAN not NULL,
             beitraege BOOLEAN not NULL,
+            datenschutz BOOLEAN not NULL,
+            bilder BOOLEAN not NULL,
+            richtigkeit BOOLEAN not NULL,
             FOREIGN KEY (adresse_id) REFERENCES adressen_unapproved(id)
         );
         """,

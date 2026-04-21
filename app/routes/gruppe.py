@@ -36,6 +36,8 @@ def gruppe(gruppe_id):
     gruppe = get_gruppe(gruppe_id)
     mitglieder = get_mitglieder(gruppe_id)
     gruppenleiter = get_gruppenleiter(gruppe_id)
+    anwesenheitheute = None
+    gruppenleiter_anwesenheitheute = None
 
     if gruppe["wochentag"] == today_name:
         anwesenheitheute = get_anwesenheit_heute(gruppe_id, "mitglied", today)
@@ -108,7 +110,7 @@ def search():
 
 @gruppe_bp.route("/gruppe/<int:gruppe_id>/mitglied/<int:mitglied_id>", methods=["POST"])
 @login_required
-@require_role(3)
+@require_role(2)
 def mitglied_zu_gruppe(gruppe_id, mitglied_id):
     mitglied_zu_gruppe_hinzufuegen(gruppe_id, mitglied_id)
 
@@ -151,7 +153,7 @@ def gruppenleiter_entfernen(gruppe_id, gruppenleiter_id):
 
 @gruppe_bp.route("/gruppe/<int:gruppe_id>/download_attendance", methods=["GET"])
 @login_required
-@require_role(3)
+@require_role(2)
 def download_attendance(gruppe_id):
     with get_kompass() as conn:
         cursor = conn.cursor()
