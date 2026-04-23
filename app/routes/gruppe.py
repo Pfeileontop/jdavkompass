@@ -25,8 +25,8 @@ gruppe_bp = Blueprint("gruppe", __name__)
 
 
 @gruppe_bp.route("/gruppen/<int:gruppe_id>", methods=["GET", "POST"])
-@require_role(1)
 @login_required
+@require_role(1)
 def gruppe(gruppe_id):
     today = datetime.date.today()
     today_name = heute()
@@ -65,7 +65,7 @@ def gruppe(gruppe_id):
         update_anwesenheit(gruppe_id, "gruppenleiter", gruppenleiter, request, alle_daten)
 
         return redirect(url_for("gruppe.gruppe", gruppe_id=gruppe_id))
-    
+
     return render_template(
         "gruppe.html",
         today_name=today_name,

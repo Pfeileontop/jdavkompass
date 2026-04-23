@@ -34,6 +34,15 @@ def mitglied_aus_gruppe_entfernen(gruppe_id, mitglied_id):
         cursor = conn.cursor()
         cursor.execute(
             """
+            DELETE FROM anwesenheit
+            WHERE
+                gruppe_id = ?
+                AND mitglied_id = ?
+            """,
+            (gruppe_id, mitglied_id),
+        )
+        cursor.execute(
+            """
             DELETE FROM mitglied_jugendgruppen
             WHERE
                 jugendgruppe_id = ?
@@ -46,6 +55,15 @@ def mitglied_aus_gruppe_entfernen(gruppe_id, mitglied_id):
 def gruppenleiter_aus_gruppe_entfernen(gruppe_id, leiter_id):
     with get_kompass() as conn:
         cursor = conn.cursor()
+        cursor.execute(
+            """
+            DELETE FROM anwesenheit_leiter
+            WHERE
+                gruppe_id = ?
+                AND gruppenleiter_id = ?
+            """,
+            (gruppe_id, leiter_id),
+        )
         cursor.execute(
             """
             DELETE FROM gruppenleiter_jugendgruppen

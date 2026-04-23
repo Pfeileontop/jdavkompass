@@ -40,16 +40,13 @@
 
     <div class="cards">
         <div class="card">
-            <h2>Fahrtkostenabrechnung</h2>
-            <a href="/download/DAV%20Reisekostenformular.pdf" download>
-                Klicke hier zum Download
+            <h2>Kostenerstattungen</h2>
+            <a href="{{ url_for('index.download', file='Reisekostenformular.pdf') }}">
+                Reisekostenformular
             </a>
-        </div>
-
-        <div class="card">
-            <h2>Auslagenerstattung</h2>
-            <a href="/download/DAV%20Reisekostenformular.pdf" download>
-                Klicke hier zum Download
+            <br>
+            <a href="{{ url_for('index.download', file='Auslagenabrechnung.docx') }}">
+                Auslagenabrechnung
             </a>
         </div>
     </div>

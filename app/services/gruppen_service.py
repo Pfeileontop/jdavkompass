@@ -24,7 +24,22 @@ def neue_gruppe_erstellen(data):
 def loesche_gruppe(gruppe_id):
     with get_kompass() as conn:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM jugendgruppen WHERE id = ?", (gruppe_id,))
+        cursor.execute(
+            """
+            DELETE FROM anwesenheit
+            WHERE
+                gruppe_id = ?
+            """,
+            (gruppe_id,)
+        )
+        cursor.execute(
+            """
+            DELETE FROM anwesenheit_leiter
+            WHERE
+                gruppe_id = ?
+            """,
+            (gruppe_id,),
+        )
         cursor.execute(
             """
             DELETE FROM mitglied_jugendgruppen
@@ -39,5 +54,6 @@ def loesche_gruppe(gruppe_id):
             WHERE
                 jugendgruppe_id = ?
             """,
-            (gruppe_id,),
+            (gruppe_id,)
         )
+        cursor.execute("DELETE FROM jugendgruppen WHERE id = ?", (gruppe_id,))
