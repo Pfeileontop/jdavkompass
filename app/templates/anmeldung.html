@@ -94,6 +94,7 @@
 
 <script>
     const canvas = document.getElementById('signature-pad');
+    canvas.style.touchAction = "none";
     const ctx = canvas.getContext('2d');
     const hiddenInput = document.getElementById('unterschrift');
     const form = canvas.closest("form");
@@ -116,26 +117,26 @@
         return { x: event.clientX - rect.left, y: event.clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('pointerdown', (e) => {
         isDrawing = true;
         const pos = getPosition(e);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
     });
 
-    canvas.addEventListener('mousemove', (e) => {
+    canvas.addEventListener('pointermove', (e) => {
         if (!isDrawing) return;
         const pos = getPosition(e);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
     });
 
-    canvas.addEventListener('mouseup', () => {
+    canvas.addEventListener('pointerup', () => {
         isDrawing = false;
         hiddenInput.value = canvas.toDataURL();
     });
 
-    canvas.addEventListener('mouseleave', () => {
+    canvas.addEventListener('pointerleave', () => {
         isDrawing = false;
     });
 
